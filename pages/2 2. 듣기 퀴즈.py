@@ -9,27 +9,32 @@ client = OpenAI(api_key=st.secrets["openai_api_key"])
 
 # 캐릭터와 성별 정의
 characters = {
-    "Paul": "male", "Jello": "male", "Uju": "male", "Khan": "male", "Eric": "male",
-    "Bora": "female", "Tina": "female", "Amy": "female"
+    "Marie": "female", "Yena": "female", "Emma": "female", "Linh": "female",
+    "Juwon": "male", "Dave": "male", "Chanho": "male"
 }
 
 def generate_question():
-    topics = ["판소리", "약과", "한글"]
-    
-    selected_topic = random.choice(topics)
-    
-    question = f"Do you know anything about {selected_topic}?"
+    questions = [
+        "What did you do yesterday, {name}?"
+    ]
     
     answers = [
-        "Yes, I know about it.",
-        "No, I have no idea."
+        "I played badminton.",
+        "I watched a movie.",
+        "I made a car.",
+        "I went fishing.",
+        "I went shopping",
+        "I went to the museum.",
+        "I played soccer",
+        "I played baseball",
+        "I learned about Korean history."
     ]
     
     korean_questions = [
-        "{name}은(는) {topics}에 대해 알고 있나요?",
-        "무엇에 대해 대화하고 있나요?"
+        "{name}은(는) 어제 무엇을 했나요?"
     ]
     
+    selected_question = random.choice(questions)
     selected_answer = random.choice(answers)
     selected_korean_question = random.choice(korean_questions)
     
@@ -43,8 +48,10 @@ def generate_question():
     if random.choice([True, False]):
         speaker_a, speaker_b = speaker_b, speaker_a
 
+    formatted_question = selected_question.format(name=speaker_b)
+    
     key_expression = f"""
-{speaker_a}: {question}
+{speaker_a}: {formatted_question}
 {speaker_b}: {selected_answer}
 """
     prompt = f"""{key_expression}을 생성해주세요. 
@@ -55,13 +62,13 @@ def generate_question():
     B는 다음과 같이 한문장을 말하세요.
     형식:
     [영어 대화]
-    A: {speaker_a}: {question}
+    A: {speaker_a}: {formatted_question}
     B: {speaker_b}: {selected_answer}
 
 
     [한국어 질문]
-    조건: {selected_korean_question.format(name=speaker_b, topics=selected_topic) if "{name}" in selected_korean_question else selected_korean_question}을 만들어야 합니다.
-    (한국어로 된 질문) 이 때, 선택지는 한국어로 제공됩니다.
+    조건: {selected_korean_question.format(name=speaker_b)}을 만들어야 합니다.
+    질문: (한국어로 된 질문) 이 때, 선택지는 한국어로 제공됩니다.
     A. (선택지)
     B. (선택지)
     C. (선택지)
@@ -138,7 +145,7 @@ def generate_explanation(question, correct_answer, user_answer, dialogue):
 
 # 메인 화면 구성
 st.header("✨인공지능 영어듣기 퀴즈 선생님 퀴즐링🕵️‍♀️")
-st.subheader("어떤것에 대해 알고있는지 묻고 답하기 영어듣기 퀴즈💡")
+st.subheader("지금 하고 있는 일에 대한 영어듣기 퀴즈🕺")
 st.divider()
 
 #확장 설명
