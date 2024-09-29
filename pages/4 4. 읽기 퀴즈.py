@@ -52,7 +52,10 @@ def generate_essay_question():
             {"role": "system", "content" : "너는 EFL 환경의 초등학교 영어교사야. 초등학생에 맞는 쉬운 한국어와 영어를 사용해."},
             {"role": "user", "content": prompt}]
     )
-
+    
+    # 응답 내용 로깅
+    print("GPT Response:", response.choices[0].message.content)
+    
     return response.choices[0].message.content
 
 def generate_conversation_question():
@@ -121,16 +124,16 @@ def generate_question():
 def parse_question_data(data, question_type):
     lines = data.split('\n')
     if question_type == "essay":
-        passage = ""
+        dialogue = ""
         question = ""
         options = []
         correct_answer = None
 
         for line in lines:
-            if line.startswith("지문:"):
-                passage = line.replace("지문:", "").strip()
-            elif line.startswith("질문:"):
+            if line.startswith("질문:"):
                 question = line.replace("질문:", "").strip()
+            elif line.startswith("대화:"):
+                dialogue = line.replace("대화:", "").strip()
             elif re.match(r'^\d+\.', line):
                 options.append(line.strip())
             elif line.startswith("정답:"):
@@ -139,7 +142,10 @@ def parse_question_data(data, question_type):
         if correct_answer:
             correct_answer = int(re.search(r'\d+', correct_answer).group())
 
-        return passage, question, options, correct_answer
+        # 디버깅을 위한 출력
+        print(f"Parsed data: Question: {question}, Dialogue: {dialogue}, Options: {options}, Answer: {correct_answer}")
+
+        return dialogue, question, options, correct_answer
     else:
         dialogue = ""
         question = ""
