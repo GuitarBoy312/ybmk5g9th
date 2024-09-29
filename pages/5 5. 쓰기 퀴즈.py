@@ -3,11 +3,17 @@ import random
 
 # 문장과 이모지 목록
 sentences = [
-    ("Do you know anything about pansori?", "🎭"),
-    ("Do you know anything about yakgwa?", "🍪"),
-    ("Do you know anything about Hangeul?", "ㄱㄴㄷ"),
-    ("Yes, I know about it.", "👍"),
-    ("No, I have no idea.", "🤷")
+    ("What did you do yesterday?", "🤔"),
+    ("I played badminton.", "🏸"),
+    ("I watched a movie.", "🎬"),
+    ("I made a car.", "🚗"),
+    ("I went fishing.", "🎣"),
+    ("I went shopping", "🛍️"),
+    ("I went to the museum.", "🏛️"),
+    ("I played soccer", "⚽"),
+    ("I played baseball", "⚾"),
+    ("I learned about Korean history.", "📚"),
+    ("I went to the space center.", "🚀")
 ]
 
 def generate_question():
@@ -22,7 +28,7 @@ def generate_question():
 
 # Streamlit UI
 st.header("✨인공지능 영어문장 퀴즈 선생님 퀴즐링🕵️‍♀️")
-st.subheader("어떤것에 대해 알고있는지 묻고 답하기 영어쓰기 퀴즈💡")
+st.subheader("어제 한 일에 대해 묻고 답하기 영어쓰기 퀴즈🚵‍♂️")
 st.divider()
 
 # 확장 설명
