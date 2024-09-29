@@ -36,6 +36,7 @@ SYSTEM_MESSAGE = {
     I played soccer. ⚽
     I played baseball. ⚾
     I learned about Korean history. 📚
+    I went to the space center. 🚀
     '''
 }
 
@@ -136,7 +137,8 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     🔹I went to the museum. 🏛️<br>
     🔹I played soccer. ⚽<br>
     🔹I played baseball. ⚾<br>
-    🔹I learned about Korean history. 📚🇰🇷<br>
+    🔹I learned about Korean history. 📚<br>
+    🔹I went to the space center. 🚀<br>
     ❓ 어렵다면 잉글링의 답변을 따라하는 것도 좋은 방법이예요.
 ''', unsafe_allow_html=True)
 
