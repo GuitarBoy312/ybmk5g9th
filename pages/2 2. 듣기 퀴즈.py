@@ -68,7 +68,7 @@ def generate_question():
 
     [한국어 질문]
     조건: {selected_korean_question.format(name=speaker_b)}을 만들어야 합니다.
-    질문: (한국어로 된 질문) 이 때, 선택지는 한국어로 제공됩니다.
+    (한국어로 된 질문) 이 때, 선택지는 한국어로 제공됩니다.
     A. (선택지)
     B. (선택지)
     C. (선택지)
