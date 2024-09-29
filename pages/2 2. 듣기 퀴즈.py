@@ -19,15 +19,15 @@ def generate_question():
     ]
     
     answers = [
-        "I played badminton.",
-        "I watched a movie.",
-        "I made a car.",
-        "I went fishing.",
-        "I went shopping",
-        "I went to the museum.",
-        "I played soccer",
-        "I played baseball",
-        "I learned about Korean history."
+        "I played badminton. 🏸",
+        "I watched a movie. 🎬",
+        "I made a car. 🚗",
+        "I went fishing. 🎣",
+        "I went shopping. 🛍️",
+        "I went to the museum. 🏛️",
+        "I played soccer. ⚽",
+        "I played baseball. ⚾",
+        "I learned about Korean history. 📚"
     ]
     
     korean_questions = [
