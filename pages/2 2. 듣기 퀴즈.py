@@ -27,7 +27,8 @@ def generate_question():
         "I went to the museum. 🏛️",
         "I played soccer. ⚽",
         "I played baseball. ⚾",
-        "I learned about Korean history. 📚"
+        "I learned about Korean history. 📚",
+        "I went to the space center. 🚀"
     ]
     
     korean_questions = [
