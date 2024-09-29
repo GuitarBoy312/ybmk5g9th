@@ -28,11 +28,11 @@ def generate_essay_question():
     question_format = f"{name}은 어제 무엇을 했나요?"
 
     key_expression = f'''
-    A: {name}, {question}
+    A: {question}, {name}
     B: {answer}
     '''
     prompt = f"""
-    {key_expression}을 이용해 1-2문장 짜리 짧은 영어 대화를 만들어 주세요.
+    {answer}을 이용해 1문장 짜리 짧은 영어 에세이를 만들어 주세요.
     그 다음, 대화 내용에 관한 간단한 질문을 한국어로 만들어주세요. 
     마지막으로, 질문에 대한 4개의 선택지를 초등학생이 이해하기 쉬운 한국어로 제공해주세요. 
     정답은 선택지 중 하나여야 합니다.
