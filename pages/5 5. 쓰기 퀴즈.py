@@ -8,10 +8,10 @@ sentences = [
     ("I watched a movie.", "🎬"),
     ("I made a car.", "🚗"),
     ("I went fishing.", "🎣"),
-    ("I went shopping", "🛍️"),
+    ("I went shopping.", "🛍️"),
     ("I went to the museum.", "🏛️"),
-    ("I played soccer", "⚽"),
-    ("I played baseball", "⚾"),
+    ("I played soccer.", "⚽"),
+    ("I played baseball.", "⚾"),
     ("I learned about Korean history.", "📚"),
     ("I went to the space center.", "🚀")
 ]
