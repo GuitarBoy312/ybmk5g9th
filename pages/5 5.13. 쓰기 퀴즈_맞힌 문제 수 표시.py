@@ -25,10 +25,11 @@ if 'total_questions' not in st.session_state:
     st.session_state.total_questions = 0
 if 'correct_answers' not in st.session_state:
     st.session_state.correct_answers = 0
+if 'current_question' not in st.session_state:
+    st.session_state.current_question = None
 
 def generate_question():
     if st.session_state.current_question_index >= len(sentences):
-        # 모든 문제를 다 풀었으면 순서를 다시 섞고 처음부터 시작
         random.shuffle(st.session_state.question_order)
         st.session_state.current_question_index = 0
     
@@ -52,39 +53,27 @@ st.title("과거 동사 퀴즈")
 st.write(f"총 문제 수: {st.session_state.total_questions}")
 st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
 
-if 'question_generated' not in st.session_state or not st.session_state.question_generated:
-    blanked_sentence, emoji, correct_word = generate_question()
-    
-    st.session_state.blanked_sentence = blanked_sentence
-    st.session_state.emoji = emoji
-    st.session_state.correct_word = correct_word
-    st.session_state.question_generated = True
+if st.session_state.current_question is None:
+    st.session_state.current_question = generate_question()
     st.session_state.total_questions += 1
 
-st.write(st.session_state.emoji)
-st.write(st.session_state.blanked_sentence)
+blanked_sentence, emoji, correct_word = st.session_state.current_question
+st.write(emoji)
+st.write(blanked_sentence)
 
 user_answer = st.text_input("빈칸에 들어갈 단어를 입력하세요:")
 
 if st.button("정답 확인"):
-    if user_answer.lower() == st.session_state.correct_word.lower():
+    if user_answer.lower() == correct_word.lower():
         st.success("정답입니다!")
         st.session_state.correct_answers += 1
-        st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")  # 업데이트된 정답 수 표시
     else:
-        st.error(f"틀렸습니다. 정답은 {st.session_state.correct_word}입니다.")
+        st.error(f"틀렸습니다. 정답은 {correct_word}입니다.")
     
-    st.session_state.question_generated = False
+    st.session_state.current_question = None
+    st.rerun()
 
 # 새 문제 만들기 버튼
 if st.button("새 문제 만들기"):
-    blanked_sentence, emoji, correct_word = generate_question()
-    
-    st.session_state.blanked_sentence = blanked_sentence
-    st.session_state.emoji = emoji
-    st.session_state.correct_word = correct_word
-    st.session_state.question_generated = True
-    st.session_state.total_questions += 1
-    
-    # 페이지 새로고침
+    st.session_state.current_question = None
     st.rerun()
