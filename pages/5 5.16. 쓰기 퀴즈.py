@@ -52,8 +52,7 @@ def generate_question():
 st.title("과거 동사 퀴즈")
 
 # 문제 수와 정답 수 표시
-st.write(f"총 문제 수: {st.session_state.total_questions}")
-st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
+st.write(f"총 문제 수: {st.session_state.total_questions}___맞춘 문제 수: {st.session_state.correct_answers}")
 
 if st.session_state.current_question is None:
     st.session_state.current_question = generate_question()
