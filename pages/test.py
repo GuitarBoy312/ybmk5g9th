@@ -27,6 +27,8 @@ if 'correct_answers' not in st.session_state:
     st.session_state.correct_answers = 0
 if 'current_question' not in st.session_state:
     st.session_state.current_question = None
+if 'num_blanks' not in st.session_state:
+    st.session_state.num_blanks = 1
 
 def generate_question():
     if st.session_state.current_question_index >= len(sentences):
@@ -38,9 +40,9 @@ def generate_question():
     words = sentence.split()
     past_tense_verbs = [word for word in words if word.endswith('ed') or word in ['went', 'made', 'did']]
     
-    # 1~3개의 단어를 선택
-    num_blanks = random.randint(1, min(3, len(past_tense_verbs)))
-    correct_words = random.sample(past_tense_verbs, num_blanks)
+    # 사용자가 선택한 빈칸 수 사용
+    num_blanks = st.session_state.num_blanks
+    correct_words = random.sample(past_tense_verbs, min(num_blanks, len(past_tense_verbs)))
     
     blanked_words = words.copy()
     for word in correct_words:
@@ -55,6 +57,9 @@ def generate_question():
 st.header("✨인공지능 영어문장 퀴즈 선생님 퀴즐링🕵️‍♀️")
 st.subheader("어제 한 일에 대해 묻고 답하기 영어쓰기 퀴즈🚵‍♂️")
 st.divider()
+
+# 수 조정 막대 추가
+st.session_state.num_blanks = st.slider("빈칸 개수를 선택하세요", 1, 3, 1)
 
 # 확장 설명
 with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 👆✅", expanded=False):
