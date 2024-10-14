@@ -77,6 +77,11 @@ st.write(f"총 문제 수: {st.session_state.total_questions}  맞춘 문제 수
 # 빈칸 개수 선택
 st.session_state.num_blanks = st.selectbox("빈칸 개수를 선택하세요:", [1, 2, 3], index=0)
 
+# 새 문제 만들기 버튼
+if st.button("새 문제 만들기"):
+    st.session_state.current_question = generate_question()
+    st.session_state.total_questions += 1
+
 if st.session_state.current_question is None:
     st.session_state.current_question = generate_question()
     st.session_state.total_questions += 1
@@ -111,9 +116,5 @@ if st.button("정답 확인"):
     
     # 다음 문제를 위한 준비
     st.session_state.current_question = None
-    
-    # 다음 문제 버튼 추가
-    if st.button("다음 문제"):
-        st.rerun()
 
-# "새 문제 만들기" 버튼 삭제
+# "다음 문제" 버튼 삭제
