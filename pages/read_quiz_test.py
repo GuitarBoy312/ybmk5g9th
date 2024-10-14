@@ -6,14 +6,17 @@ import re
 # OpenAI 클라이언트 초기화
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
-# 세션 상태에 현재 문제 유형을 저장하기 위한 키 추가
-if 'current_question_type' not in st.session_state:
-    st.session_state.current_question_type = None
-
+# 세션 상태 초기화
 if 'initialized' not in st.session_state:
     st.session_state.initialized = True
     st.session_state.total_questions = 0
     st.session_state.correct_answers = 0
+    st.session_state.current_question_type = None
+    st.session_state.question_data = None
+    st.session_state.selected_option = None
+    st.session_state.show_answer = False
+    st.session_state.last_checked_option = None
+    st.session_state.explanation = None
 
 def generate_essay_question():
     name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
@@ -226,37 +229,11 @@ def get_explanation_dialogue(question, dialogue, correct_answer, selected_option
     return response.choices[0].message.content.strip()
 
 def main():
-    # Streamlit UI
-
-    # 메인 화면 구성
     st.header("✨인공지능 영어 퀴즈 선생님 퀴즐링🕵️‍♀️")
     st.subheader("어제 한 일에 대해 묻고 답하기 영어읽기 퀴즈🚵‍♂️")
     st.divider()
 
-    #확장 설명
-    with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 👆✅", expanded=False):
-        st.markdown(
-    """     
-    1️⃣ [새 문제 만들기] 버튼을 눌러 문제 만들기.<br>
-    2️⃣ 질문과 대화를 읽어보기<br> 
-    3️⃣ 정답을 선택하고 [정답 확인] 버튼 누르기.<br>
-    4️⃣ 정답 확인하기.<br>
-    <br>
-    🙏 퀴즐링은 완벽하지 않을 수 있어요.<br> 
-    🙏 그럴 때에는 [새 문제 만들기] 버튼을 눌러주세요.
-    """
-    ,  unsafe_allow_html=True)
-
-    # 세션 상태 초기화
-    if 'question_data' not in st.session_state:
-        st.session_state.question_data = None
-        st.session_state.question_type = None
-        st.session_state.selected_option = None
-        st.session_state.show_answer = False
-        st.session_state.last_checked_option = None
-        st.session_state.explanation = None
-
-    # 통계 표시를 main 함수 시작 부분으로 이동
+    # 통계 표시
     st.sidebar.markdown(f"### 퀴즈 통계")
     st.sidebar.markdown(f"총 문제 수: {st.session_state.total_questions}")
     st.sidebar.markdown(f"맞춘 문제 수: {st.session_state.correct_answers}")
@@ -267,78 +244,55 @@ def main():
         st.session_state.show_answer = False
         st.session_state.last_checked_option = None
         st.session_state.explanation = None
-        st.session_state.total_questions += 1  # 새 문제 생성 시 총 문제 수 증가
+        st.session_state.total_questions += 1
+        st.experimental_rerun()
 
     if st.session_state.question_data:
         if st.session_state.question_type == "essay":
             passage, question, options, correct_answer = parse_question_data(st.session_state.question_data, "essay")
-            
-            st.subheader("질문")
-            st.write(question)
-
-            st.divider()
-            st.write(passage)
-            st.divider()
-
-            st.subheader("다음 중 알맞은 답을 골라보세요.")
-            selected_option = st.radio("", options, index=None, key="essay_options")
-            st.session_state.selected_option = selected_option
-
         else:
             dialogue, question, options, correct_answer = parse_question_data(st.session_state.question_data, "conversation")
-            
-            st.markdown("### 질문")
-            st.write(question)
-            
-            st.divider()
+        
+        st.markdown("### 질문")
+        st.write(question)
+        
+        st.divider()
+        if st.session_state.question_type == "essay":
+            st.write(passage)
+        else:
             st.text(dialogue)
-            st.divider() 
-            st.subheader("다음 중 알맞은 답을 골라보세요.")
-            selected_option = st.radio("", options, index=None, key="conversation_options")
-            st.session_state.selected_option = selected_option
+        st.divider()
+
+        st.subheader("다음 중 알맞은 답을 골라보세요.")
+        selected_option = st.radio("", options, index=None, key="quiz_options")
+        st.session_state.selected_option = selected_option
 
         if st.button("정답 확인"):
             st.session_state.show_answer = True
             st.session_state.last_checked_option = st.session_state.selected_option
 
-            if st.session_state.question_type == "essay":
-                selected_number = int(st.session_state.last_checked_option.split('.')[0].strip())
-                is_correct = selected_number == correct_answer
-            else:
-                selected_letter = st.session_state.last_checked_option.split('.')[0].strip()
-                is_correct = selected_letter == correct_answer
-            
-            if is_correct:
-                st.session_state.correct_answers += 1  # 정답일 경우 맞춘 문제 수 증가
-
-            if not is_correct:
+            if st.session_state.selected_option:
                 if st.session_state.question_type == "essay":
-                    st.session_state.explanation = get_explanation_essay(question, passage, correct_answer, st.session_state.last_checked_option)
+                    selected_number = int(st.session_state.selected_option.split('.')[0].strip())
+                    is_correct = selected_number == correct_answer
                 else:
-                    st.session_state.explanation = get_explanation_dialogue(question, dialogue, correct_answer, st.session_state.last_checked_option)
-
-        if st.session_state.show_answer and st.session_state.last_checked_option:
-            st.markdown(f"""
-            <div style='background-color: #E6F3FF; padding: 10px; border-radius: 5px; margin-top: 10px;'>
-            선택한 답: {st.session_state.last_checked_option}
-            </div>
-            """, unsafe_allow_html=True)
-
-            if st.session_state.question_type == "essay":
-                selected_number = int(st.session_state.last_checked_option.split('.')[0].strip())
-                is_correct = selected_number == correct_answer
-            else:
-                selected_letter = st.session_state.last_checked_option.split('.')[0].strip()
-                is_correct = selected_letter == correct_answer
-            
-            if is_correct:
-                st.success("정답입니다!")
-            else:
-                st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
-                if st.session_state.explanation:
+                    selected_letter = st.session_state.selected_option.split('.')[0].strip()
+                    is_correct = selected_letter == correct_answer
+                
+                if is_correct:
+                    st.session_state.correct_answers += 1
+                    st.success("정답입니다!")
+                else:
+                    st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
+                    if st.session_state.question_type == "essay":
+                        st.session_state.explanation = get_explanation_essay(question, passage, correct_answer, st.session_state.selected_option)
+                    else:
+                        st.session_state.explanation = get_explanation_dialogue(question, dialogue, correct_answer, st.session_state.selected_option)
                     st.write(st.session_state.explanation)
-        elif st.session_state.show_answer and not st.session_state.last_checked_option:
-            st.warning("선택지를 선택하고 정답 확인 버튼을 눌러주세요.")
+                
+                st.experimental_rerun()
+            else:
+                st.warning("선택지를 선택하고 정답 확인 버튼을 눌러주세요.")
 
 if __name__ == "__main__":
     main()
