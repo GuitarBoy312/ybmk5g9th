@@ -250,7 +250,9 @@ def main():
         st.session_state.show_answer = False
         st.session_state.last_checked_option = None
         st.session_state.explanation = None
+    if 'total_questions' not in st.session_state:
         st.session_state.total_questions = 0
+    if 'correct_answers' not in st.session_state:
         st.session_state.correct_answers = 0
 
     # 총 문제 수와 맞춘 문제 수 표시
