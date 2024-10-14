@@ -40,8 +40,8 @@ def generate_question(num_blanks):
     words = sentence.split()
     past_tense_verbs = [word for word in words if word.endswith('ed') or word in ['went', 'made', 'did']]
     
-    # 선택된 빈칸 개수 사용
-    num_blanks = min(num_blanks, len(past_tense_verbs))
+    # 선택된 빈칸 개수 사용 (최대 3개로 제한)
+    num_blanks = min(num_blanks, len(past_tense_verbs), 3)
     correct_words = random.sample(past_tense_verbs, num_blanks)
     blank_indices = [words.index(word) for word in correct_words]
     
@@ -75,7 +75,7 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
 # 문제 수와 정답 수 표시
 st.write(f"총 문제 수: {st.session_state.total_questions}  맞춘 문제 수: {st.session_state.correct_answers}")
 
-# 빈칸 개수 선택
+# 빈칸 개수 선택 (1, 2, 3 중에서)
 st.session_state.num_blanks = st.selectbox("빈칸 개수를 선택하세요:", [1, 2, 3], index=0)
 
 # 새 문제 만들기 버튼
@@ -98,12 +98,12 @@ for i in range(len(correct_words)):
 
 if st.button("정답 확인"):
     all_correct = True
-    for user_answer, correct_word in zip(user_answers, correct_words):
-        st.write(f"입력한 답: {user_answer}")
+    for i, (user_answer, correct_word) in enumerate(zip(user_answers, correct_words)):
+        st.write(f"빈칸 {i+1} - 입력한 답: {user_answer}")
         if user_answer.lower() == correct_word.lower():
-            st.success("정답입니다!")
+            st.success(f"빈칸 {i+1}: 정답입니다!")
         else:
-            st.error(f"틀렸습니다. 정답은 {correct_word}입니다.")
+            st.error(f"빈칸 {i+1}: 틀렸습니다. 정답은 {correct_word}입니다.")
             all_correct = False
     
     if all_correct:
