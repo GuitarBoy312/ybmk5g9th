@@ -30,7 +30,7 @@ if 'current_question' not in st.session_state:
 if 'num_blanks' not in st.session_state:
     st.session_state.num_blanks = 1
 
-def generate_question():
+def generate_question(num_blanks):
     if st.session_state.current_question_index >= len(sentences):
         random.shuffle(st.session_state.question_order)
         st.session_state.current_question_index = 0
@@ -40,7 +40,8 @@ def generate_question():
     words = sentence.split()
     past_tense_verbs = [word for word in words if word.endswith('ed') or word in ['went', 'made', 'did']]
     
-    num_blanks = min(st.session_state.num_blanks, len(past_tense_verbs))
+    # 선택된 빈칸 개수 사용
+    num_blanks = min(num_blanks, len(past_tense_verbs))
     correct_words = random.sample(past_tense_verbs, num_blanks)
     blank_indices = [words.index(word) for word in correct_words]
     
@@ -79,11 +80,11 @@ st.session_state.num_blanks = st.selectbox("빈칸 개수를 선택하세요:", 
 
 # 새 문제 만들기 버튼
 if st.button("새 문제 만들기"):
-    st.session_state.current_question = generate_question()
+    st.session_state.current_question = generate_question(st.session_state.num_blanks)
     st.session_state.total_questions += 1
 
 if st.session_state.current_question is None:
-    st.session_state.current_question = generate_question()
+    st.session_state.current_question = generate_question(st.session_state.num_blanks)
     st.session_state.total_questions += 1
 
 blanked_sentence, translation, emoji, correct_words = st.session_state.current_question
