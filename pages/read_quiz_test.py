@@ -245,7 +245,7 @@ def main():
         st.session_state.last_checked_option = None
         st.session_state.explanation = None
         st.session_state.total_questions += 1
-        st.experimental_rerun()
+        st.rerun()
 
     if st.session_state.question_data:
         if st.session_state.question_type == "essay":
@@ -290,7 +290,7 @@ def main():
                         st.session_state.explanation = get_explanation_dialogue(question, dialogue, correct_answer, st.session_state.selected_option)
                     st.write(st.session_state.explanation)
                 
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.warning("선택지를 선택하고 정답 확인 버튼을 눌러주세요.")
 
