@@ -10,6 +10,11 @@ client = OpenAI(api_key=st.secrets["openai_api_key"])
 if 'current_question_type' not in st.session_state:
     st.session_state.current_question_type = None
 
+if 'initialized' not in st.session_state:
+    st.session_state.initialized = True
+    st.session_state.total_questions = 0
+    st.session_state.correct_answers = 0
+
 def generate_essay_question():
     name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
     question = "What did you do yesterday?"
@@ -250,12 +255,8 @@ def main():
         st.session_state.show_answer = False
         st.session_state.last_checked_option = None
         st.session_state.explanation = None
-    if 'total_questions' not in st.session_state:
-        st.session_state.total_questions = 0
-    if 'correct_answers' not in st.session_state:
-        st.session_state.correct_answers = 0
 
-    # 총 문제 수와 맞춘 문제 수 표시
+    # 통계 표시를 main 함수 시작 부분으로 이동
     st.sidebar.markdown(f"### 퀴즈 통계")
     st.sidebar.markdown(f"총 문제 수: {st.session_state.total_questions}")
     st.sidebar.markdown(f"맞춘 문제 수: {st.session_state.correct_answers}")
