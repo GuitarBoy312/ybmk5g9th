@@ -16,26 +16,26 @@ sentences = [
 ]
 
 # 세션 상태 초기화
-if 'question_order' not in st.session_state:
-    st.session_state.question_order = list(range(len(sentences)))
-    random.shuffle(st.session_state.question_order)
-if 'current_question_index' not in st.session_state:
-    st.session_state.current_question_index = 0
-if 'total_questions' not in st.session_state:
-    st.session_state.total_questions = 0
-if 'correct_answers' not in st.session_state:
-    st.session_state.correct_answers = 0
-if 'current_question' not in st.session_state:
-    st.session_state.current_question = None
-if 'sidebar_placeholder' not in st.session_state:
-    st.session_state.sidebar_placeholder = st.sidebar.empty()
+if 'writing_quiz_question_order' not in st.session_state:
+    st.session_state.writing_quiz_question_order = list(range(len(sentences)))
+    random.shuffle(st.session_state.writing_quiz_question_order)
+if 'writing_quiz_current_question_index' not in st.session_state:
+    st.session_state.writing_quiz_current_question_index = 0
+if 'writing_quiz_total_questions' not in st.session_state:
+    st.session_state.writing_quiz_total_questions = 0
+if 'writing_quiz_correct_answers' not in st.session_state:
+    st.session_state.writing_quiz_correct_answers = 0
+if 'writing_quiz_current_question' not in st.session_state:
+    st.session_state.writing_quiz_current_question = None
+if 'writing_quiz_sidebar_placeholder' not in st.session_state:
+    st.session_state.writing_quiz_sidebar_placeholder = st.sidebar.empty()
 
 def generate_question():
-    if st.session_state.current_question_index >= len(sentences):
-        random.shuffle(st.session_state.question_order)
-        st.session_state.current_question_index = 0
+    if st.session_state.writing_quiz_current_question_index >= len(sentences):
+        random.shuffle(st.session_state.writing_quiz_question_order)
+        st.session_state.writing_quiz_current_question_index = 0
     
-    sentence_index = st.session_state.question_order[st.session_state.current_question_index]
+    sentence_index = st.session_state.writing_quiz_question_order[st.session_state.writing_quiz_current_question_index]
     sentence, translation, emoji = sentences[sentence_index]
     words = sentence.split()
     past_tense_verbs = [word for word in words if word.endswith('ed') or word in ['went', 'made', 'did']]
@@ -47,19 +47,19 @@ def generate_question():
     blanked_words[blank_index] = '_____'
     blanked_sentence = ' '.join(blanked_words)
     
-    st.session_state.current_question_index += 1
+    st.session_state.writing_quiz_current_question_index += 1
     
     return blanked_sentence, translation, emoji, correct_word
 
 # 사이드바 업데이트 함수
 def update_sidebar():
-    st.session_state.sidebar_placeholder.empty()
-    with st.session_state.sidebar_placeholder.container():
+    st.session_state.writing_quiz_sidebar_placeholder.empty()
+    with st.session_state.writing_quiz_sidebar_placeholder.container():
         st.write("## 퀴즈 진행 상황")
-        st.write(f"총 문제 수: {st.session_state.total_questions}")
-        st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
-        if st.session_state.total_questions > 0:
-            accuracy = int((st.session_state.correct_answers / st.session_state.total_questions) * 100)
+        st.write(f"총 문제 수: {st.session_state.writing_quiz_total_questions}")
+        st.write(f"맞춘 문제 수: {st.session_state.writing_quiz_correct_answers}")
+        if st.session_state.writing_quiz_total_questions > 0:
+            accuracy = int((st.session_state.writing_quiz_correct_answers / st.session_state.writing_quiz_total_questions) * 100)
             st.write(f"정확도: {accuracy}%")
 
 # 초기 사이드바 설정
@@ -83,8 +83,8 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     """
     , unsafe_allow_html=True)
 
-if st.session_state.current_question is not None:
-    blanked_sentence, translation, emoji, correct_word = st.session_state.current_question
+if st.session_state.writing_quiz_current_question is not None:
+    blanked_sentence, translation, emoji, correct_word = st.session_state.writing_quiz_current_question
     st.markdown(f"### {blanked_sentence} {emoji}")
     st.write(f"해석: {translation}")
 
@@ -95,7 +95,7 @@ if st.session_state.current_question is not None:
         
         if user_answer.lower() == correct_word.lower():
             st.success("정답입니다!")
-            st.session_state.correct_answers += 1
+            st.session_state.writing_quiz_correct_answers += 1
             update_sidebar()
         else:
             st.error(f"틀렸습니다. 정답은 {correct_word}입니다.")
@@ -103,12 +103,11 @@ if st.session_state.current_question is not None:
         full_sentence = blanked_sentence.replace('_____', correct_word)
         st.markdown(f"### 정답 문장: {full_sentence} {emoji}")
         
-        st.session_state.current_question = None
+        st.session_state.writing_quiz_current_question = None
 
 # "새 문제 만들기" 버튼
 if st.button("새 문제 만들기"):
-    st.session_state.current_question = generate_question()
-    st.session_state.total_questions += 1
+    st.session_state.writing_quiz_current_question = generate_question()
+    st.session_state.writing_quiz_total_questions += 1
     update_sidebar()
     st.rerun()
-
