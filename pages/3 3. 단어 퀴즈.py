@@ -41,13 +41,16 @@ def generate_question():
     random.shuffle(options)
     return question, options, correct_answer
 
-# 세션 상태 초기화
-if 'vocabulary_quiz_question_generated' not in st.session_state:
+# 앱 시작 시 초기화를 위한 키
+if 'vocabulary_quiz_init' not in st.session_state:
+    st.session_state.vocabulary_quiz_init = False
+
+# 앱 시작 시 초기화
+if not st.session_state.vocabulary_quiz_init:
     st.session_state.vocabulary_quiz_question_generated = False
-if 'vocabulary_quiz_correct_count' not in st.session_state:
     st.session_state.vocabulary_quiz_correct_count = 0
-if 'vocabulary_quiz_total_count' not in st.session_state:
     st.session_state.vocabulary_quiz_total_count = 0
+    st.session_state.vocabulary_quiz_init = True
 
 # 메인 화면 구성
 st.header("✨인공지능 영어단어 퀴즈 선생님 퀴즐링🕵️‍♀️")
