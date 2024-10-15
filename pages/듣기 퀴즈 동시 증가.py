@@ -119,12 +119,12 @@ def split_dialogue(text):
     lines = text.strip().split('\n')
     speakers = {}
     for line in lines:
-        match = re.match(r'([A-Z]):\s*(.*)', line)
+        match = re.match(r'([A-Za-z]+):\s*(.*)', line)
         if match:
             speaker, content = match.groups()
             if speaker not in speakers:
                 speakers[speaker] = []
-            speakers[speaker].append(content)
+            speakers[speaker].append(content.strip())
     return speakers
 
 def text_to_speech(text, speaker):
@@ -147,7 +147,7 @@ def generate_dialogue_audio(dialogue):
     
     for speaker, lines in speakers.items():
         text = " ".join(lines)
-        speaker_name = re.search(r'([A-Za-z]+):', lines[0]).group(1)  # 대화에서 화자 이름 추출
+        speaker_name = speaker.split(':')[0].strip()  # 대화에서 화자 이름 추출
         audio_tag = text_to_speech(text, speaker_name)
         audio_tags.append(audio_tag)
     
