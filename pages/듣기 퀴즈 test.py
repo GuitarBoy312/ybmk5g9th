@@ -233,7 +233,7 @@ if st.button("새 문제 만들기"):
         
         if "[한국어 질문]" not in full_content:
             st.error("문제 생성에 실패했습니다. 다시 시도해 주세요.")
-            st.rerun()
+            st.stop()
         
         dialogue, question_part = full_content.split("[한국어 질문]")
         
@@ -249,7 +249,7 @@ if st.button("새 문제 만들기"):
         
         if not question or not options or not correct_answer:
             st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
-            st.rerun()
+            st.stop()
         
         st.session_state.question = question
         st.session_state.dialogue = dialogue.strip()
@@ -262,11 +262,5 @@ if st.button("새 문제 만들기"):
         
         st.session_state.total_questions += 1
         update_sidebar()
-        st.rerun()
     except Exception as e:
         st.error(f"문제 생성 중 오류가 발생했습니다: {str(e)}")
-        st.rerun()
-
-# 앱이 처음 로드될 때 자동으로 새로고침
-if st.session_state.current_question is None:
-    st.rerun()
