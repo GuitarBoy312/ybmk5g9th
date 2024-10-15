@@ -101,8 +101,8 @@ if st.button("새 문제 만들기"):
 
 # 사이드바에 정답 카운트 표시
 st.sidebar.header("퀴즈 통계")
-st.sidebar.write(f"정답 수: {st.session_state.correct_count}")
 st.sidebar.write(f"총 문제 수: {st.session_state.total_count}")
+st.sidebar.write(f"맞춘 문제 수: {st.session_state.correct_count}")
 if st.session_state.total_count > 0:
     accuracy = (st.session_state.correct_count / st.session_state.total_count) * 100
     st.sidebar.write(f"정확도: {accuracy:.2f}%")
