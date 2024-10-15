@@ -204,14 +204,8 @@ if st.session_state.current_question is not None:
         
         if submit_button:
             if selected_option:
-                st.info(f"선택한 답: {selected_option}")
-                # 정답 비교 로직 수정
                 correct_answer = st.session_state.correct_answer
                 user_answer = selected_option
-                
-                # 디버깅을 위한 출력
-                st.write(f"정답: {correct_answer}")
-                st.write(f"사용자 답변: {user_answer}")
                 
                 if user_answer == correct_answer:
                     st.success("정답입니다!")
@@ -219,22 +213,16 @@ if st.session_state.current_question is not None:
                 else:
                     st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
                 
-                st.text(st.session_state.dialogue)
-                
                 update_sidebar()
                 st.session_state.current_question = None
             else:
                 st.warning("답을 선택해주세요.")
 
-# "새 문제 만들기" 버튼을 페이지 맨 아래로 이동
+# "새 문제 만들기" 버튼 부분
 if st.button("새 문제 만들기"):
     try:
         with st.spinner("새로운 문제를 생성 중입니다..."):
             full_content = generate_question()
-        
-        if full_content is None:
-            st.error("문제 생성에 실패했습니다. 다시 시도해 주세요.")
-            st.stop()
         
         if "[한국어 질문]" not in full_content:
             st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
@@ -256,28 +244,21 @@ if st.button("새 문제 만들기"):
             st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
             st.stop()
         
-        # 정답이 옵션 중 하나인지 확인
-        if correct_answer not in options:
-            st.error("생성된 정답이 옵션에 없습니다. 다시 시도해 주세요.")
-            st.stop()
-        
         st.session_state.question = question
         st.session_state.dialogue = dialogue.strip()
         st.session_state.options = options
         st.session_state.correct_answer = correct_answer
         st.session_state.current_question = (question, options, correct_answer)
         
-        # 디버깅을 위한 출력
-        st.write("생성된 문제 정보:")
-        st.write(f"질문: {question}")
-        st.write(f"옵션: {options}")
-        st.write(f"정답: {correct_answer}")
-        
         # 새 대화에 대한 음성 생성 (남녀 목소리 구분)
         st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
         
         st.session_state.total_questions += 1
         update_sidebar()
-        st.rerun()  # 페이지를 새로고침하여 음성 파일을 표시합니다.
+        st.rerun()
     except Exception as e:
-        st.error(f"문제 생성 중 오류가 발생했습니다: {str(e)}")
+        st.error("문제 생성 중 오류가 발생했습니다. 다시 시도해 주세요.")
+
+# 앱이 처음 로드될 때 자동으로 새로고침
+if st.session_state.current_question is None:
+    st.rerun()
