@@ -208,7 +208,12 @@ if st.session_state.current_question is not None:
                 # 정답 비교 로직 수정
                 correct_answer = st.session_state.correct_answer.strip()
                 user_answer = selected_option.strip()
-                if user_answer == correct_answer:
+                
+                # 정답 비교를 위해 옵션의 알파벳 제거
+                correct_answer_text = correct_answer.split('. ', 1)[-1] if '. ' in correct_answer else correct_answer
+                user_answer_text = user_answer.split('. ', 1)[-1] if '. ' in user_answer else user_answer
+                
+                if user_answer_text.lower() == correct_answer_text.lower():
                     st.success("정답입니다!")
                     st.session_state.correct_answers += 1
                 else:
