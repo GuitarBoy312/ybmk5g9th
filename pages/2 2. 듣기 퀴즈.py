@@ -211,6 +211,7 @@ if st.session_state.listening_quiz_current_question is not None:
                 correct_answer = st.session_state.correct_answer
                 user_answer = selected_option
                 
+                st.session_state.listening_quiz_total_questions += 1
                 if user_answer == correct_answer:
                     st.success("정답입니다!")
                     st.session_state.listening_quiz_correct_answers += 1
@@ -266,7 +267,6 @@ if st.button("새 문제 만들기"):
         
         st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
         
-        st.session_state.listening_quiz_total_questions += 1
         update_sidebar()
         st.rerun()
     except Exception as e:
