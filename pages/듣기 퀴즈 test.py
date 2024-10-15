@@ -227,28 +227,46 @@ if st.session_state.current_question is not None:
 
 # "새 문제 만들기" 버튼을 페이지 맨 아래로 이동
 if st.button("새 문제 만들기"):
-    full_content = generate_question()
-    
-    dialogue, question_part = full_content.split("[한국어 질문]")
-    
-    question_lines = question_part.strip().split("\n")
-    question = question_lines[0].replace("질문:", "").strip() if question_lines else ""
-    options = question_lines[1:5] if len(question_lines) > 1 else []
-    correct_answer = ""
-    
-    for line in question_lines:
-        if line.startswith("정답:"):
-            correct_answer = line.replace("정답:", "").strip()
-            break
-    
-    st.session_state.question = question
-    st.session_state.dialogue = dialogue.strip()
-    st.session_state.options = options
-    st.session_state.correct_answer = correct_answer
-    st.session_state.question_generated = True
-    
-    # 새 대화에 대한 음성 생성 (남녀 목소리 구분)
-    st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
-    
-    # 페이지 새로고침
+    try:
+        with st.spinner("새로운 문제를 생성 중입니다..."):
+            full_content = generate_question()
+        
+        if "[한국어 질문]" not in full_content:
+            st.error("문제 생성에 실패했습니다. 다시 시도해 주세요.")
+            st.rerun()
+        
+        dialogue, question_part = full_content.split("[한국어 질문]")
+        
+        question_lines = question_part.strip().split("\n")
+        question = question_lines[0].replace("질문:", "").strip() if question_lines else ""
+        options = [line.strip() for line in question_lines[1:5] if line.strip()]
+        correct_answer = ""
+        
+        for line in question_lines:
+            if line.startswith("정답:"):
+                correct_answer = line.replace("정답:", "").strip()
+                break
+        
+        if not question or not options or not correct_answer:
+            st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
+            st.rerun()
+        
+        st.session_state.question = question
+        st.session_state.dialogue = dialogue.strip()
+        st.session_state.options = options
+        st.session_state.correct_answer = correct_answer
+        st.session_state.current_question = (question, options, correct_answer)
+        
+        # 새 대화에 대한 음성 생성 (남녀 목소리 구분)
+        st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
+        
+        st.session_state.total_questions += 1
+        update_sidebar()
+        st.rerun()
+    except Exception as e:
+        st.error(f"문제 생성 중 오류가 발생했습니다: {str(e)}")
+        st.rerun()
+
+# 앱이 처음 로드될 때 자동으로 새로고침
+if st.session_state.current_question is None:
     st.rerun()
