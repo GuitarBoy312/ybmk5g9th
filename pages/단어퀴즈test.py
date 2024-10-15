@@ -49,16 +49,6 @@ if 'correct_count' not in st.session_state:
 if 'total_count' not in st.session_state:
     st.session_state.total_count = 0
 
-# 앱을 열었을 때 자동으로 새로운 문제 생성
-if not st.session_state.question_generated:
-    question, options, correct_answer = generate_question()
-    st.session_state.question = question
-    st.session_state.options = options
-    st.session_state.correct_answer = correct_answer
-    st.session_state.question_generated = True
-
-# Streamlit UI
-
 # 메인 화면 구성
 st.header("✨인공지능 영어단어 퀴즈 선생님 퀴즐링🕵️‍♀️")
 st.subheader("어제 한 일에 대해 묻고 답하기 영어단어 퀴즈🚵‍♂️")
@@ -78,7 +68,7 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     """
     ,  unsafe_allow_html=True)
 
-if 'question_generated' in st.session_state and st.session_state.question_generated:
+if st.session_state.question_generated:
     st.markdown("### 질문")
     st.write(st.session_state.question)
       
@@ -97,8 +87,10 @@ if 'question_generated' in st.session_state and st.session_state.question_genera
                     st.error(f"틀렸습니다. 정답은 {st.session_state.correct_answer}입니다.")
             else:
                 st.warning("답을 선택해주세요.")
+else:
+    st.info("아래의 '새 문제 만들기' 버튼을 눌러 퀴즈를 시작하세요.")
 
-# 새 문제 만들기 버튼을 맨 아래로 이동
+# 새 문제 만들기 버튼
 if st.button("새 문제 만들기"):
     question, options, correct_answer = generate_question()
     st.session_state.question = question
