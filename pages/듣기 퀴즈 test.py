@@ -238,8 +238,6 @@ if st.button("새 문제 만들기"):
             st.error("문제 생성에 실패했습니다. 다시 시도해 주세요.")
             st.stop()
         
-        st.write("생성된 내용:", full_content)  # 디버깅을 위해 추가
-        
         if "[한국어 질문]" not in full_content:
             st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
             st.stop()
@@ -271,5 +269,6 @@ if st.button("새 문제 만들기"):
         
         st.session_state.total_questions += 1
         update_sidebar()
+        st.rerun()  # 페이지를 새로고침하여 음성 파일을 표시합니다.
     except Exception as e:
         st.error(f"문제 생성 중 오류가 발생했습니다: {str(e)}")
