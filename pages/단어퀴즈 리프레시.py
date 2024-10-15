@@ -41,16 +41,15 @@ def generate_question():
     random.shuffle(options)
     return question, options, correct_answer
 
-# 앱 시작 시 초기화를 위한 키
-if 'vocabulary_quiz_init' not in st.session_state:
-    st.session_state.vocabulary_quiz_init = False
-
 # 앱 시작 시 초기화
-if not st.session_state.vocabulary_quiz_init:
+if 'vocabulary_quiz_initialized' not in st.session_state:
+    st.session_state.vocabulary_quiz_initialized = False
+
+if not st.session_state.vocabulary_quiz_initialized:
     st.session_state.vocabulary_quiz_question_generated = False
     st.session_state.vocabulary_quiz_correct_count = 0
     st.session_state.vocabulary_quiz_total_count = 0
-    st.session_state.vocabulary_quiz_init = True
+    st.session_state.vocabulary_quiz_initialized = True
 
 # 메인 화면 구성
 st.header("✨인공지능 영어단어 퀴즈 선생님 퀴즐링🕵️‍♀️")
@@ -103,7 +102,7 @@ if st.button("새 문제 만들기"):
     st.rerun()
 
 # 사이드바에 정답 카운트 표시
-st.sidebar.header("단어퀴즈 진행상황")
+st.sidebar.header("퀴즈 통계")
 st.sidebar.write(f"총 문제 수: {st.session_state.vocabulary_quiz_total_count}")
 st.sidebar.write(f"맞춘 문제 수: {st.session_state.vocabulary_quiz_correct_count}")
 if st.session_state.vocabulary_quiz_total_count > 0:
