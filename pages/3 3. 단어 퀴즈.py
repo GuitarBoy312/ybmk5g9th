@@ -42,12 +42,12 @@ def generate_question():
     return question, options, correct_answer
 
 # 세션 상태 초기화
-if 'question_generated' not in st.session_state:
-    st.session_state.question_generated = False
-if 'correct_count' not in st.session_state:
-    st.session_state.correct_count = 0
-if 'total_count' not in st.session_state:
-    st.session_state.total_count = 0
+if 'vocabulary_quiz_question_generated' not in st.session_state:
+    st.session_state.vocabulary_quiz_question_generated = False
+if 'vocabulary_quiz_correct_count' not in st.session_state:
+    st.session_state.vocabulary_quiz_correct_count = 0
+if 'vocabulary_quiz_total_count' not in st.session_state:
+    st.session_state.vocabulary_quiz_total_count = 0
 
 # 메인 화면 구성
 st.header("✨인공지능 영어단어 퀴즈 선생님 퀴즐링🕵️‍♀️")
@@ -68,7 +68,7 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     """
     ,  unsafe_allow_html=True)
 
-if st.session_state.question_generated:
+if st.session_state.vocabulary_quiz_question_generated:
     st.markdown("### 질문")
     st.write(st.session_state.question)
       
@@ -79,10 +79,10 @@ if st.session_state.question_generated:
         if submit_button:
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
-                st.session_state.total_count += 1
+                st.session_state.vocabulary_quiz_total_count += 1
                 if selected_option.strip() == st.session_state.correct_answer.strip():  
                     st.success("정답입니다!")
-                    st.session_state.correct_count += 1
+                    st.session_state.vocabulary_quiz_correct_count += 1
                 else:
                     st.error(f"틀렸습니다. 정답은 {st.session_state.correct_answer}입니다.")
             else:
@@ -96,13 +96,13 @@ if st.button("새 문제 만들기"):
     st.session_state.question = question
     st.session_state.options = options
     st.session_state.correct_answer = correct_answer
-    st.session_state.question_generated = True
+    st.session_state.vocabulary_quiz_question_generated = True
     st.rerun()
 
 # 사이드바에 정답 카운트 표시
 st.sidebar.header("퀴즈 통계")
-st.sidebar.write(f"총 문제 수: {st.session_state.total_count}")
-st.sidebar.write(f"맞춘 문제 수: {st.session_state.correct_count}")
-if st.session_state.total_count > 0:
-    accuracy = (st.session_state.correct_count / st.session_state.total_count) * 100
-    st.sidebar.write(f"정확도: {accuracy:.2f}%")
+st.sidebar.write(f"총 문제 수: {st.session_state.vocabulary_quiz_total_count}")
+st.sidebar.write(f"맞춘 문제 수: {st.session_state.vocabulary_quiz_correct_count}")
+if st.session_state.vocabulary_quiz_total_count > 0:
+    accuracy = int((st.session_state.vocabulary_quiz_correct_count / st.session_state.vocabulary_quiz_total_count) * 100)
+    st.sidebar.write(f"정확도: {accuracy}%")
