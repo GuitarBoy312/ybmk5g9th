@@ -85,6 +85,11 @@ if st.session_state.current_question is not None:
         if user_answer.lower() == correct_word.lower():
             st.success("정답입니다!")
             st.session_state.correct_answers += 1
+            # 사이드바 업데이트
+            st.sidebar.empty()
+            st.sidebar.write("## 퀴즈 진행 상황")
+            st.sidebar.write(f"총 문제 수: {st.session_state.total_questions}")
+            st.sidebar.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
         else:
             st.error(f"틀렸습니다. 정답은 {correct_word}입니다.")
         
@@ -97,4 +102,9 @@ if st.session_state.current_question is not None:
 if st.button("새 문제 만들기"):
     st.session_state.current_question = generate_question()
     st.session_state.total_questions += 1
+    # 사이드바 업데이트
+    st.sidebar.empty()
+    st.sidebar.write("## 퀴즈 진행 상황")
+    st.sidebar.write(f"총 문제 수: {st.session_state.total_questions}")
+    st.sidebar.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
     st.rerun()
