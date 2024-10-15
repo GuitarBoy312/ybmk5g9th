@@ -206,14 +206,14 @@ if st.session_state.current_question is not None:
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
                 # 정답 비교 로직 수정
-                correct_answer = st.session_state.correct_answer.strip()
-                user_answer = selected_option.strip()
+                correct_answer = st.session_state.correct_answer
+                user_answer = selected_option
                 
-                # 정답 비교를 위해 옵션의 알파벳 제거
-                correct_answer_text = correct_answer.split('. ', 1)[-1] if '. ' in correct_answer else correct_answer
-                user_answer_text = user_answer.split('. ', 1)[-1] if '. ' in user_answer else user_answer
+                # 디버깅을 위한 출력
+                st.write(f"정답: {correct_answer}")
+                st.write(f"사용자 답변: {user_answer}")
                 
-                if user_answer_text.lower() == correct_answer_text.lower():
+                if user_answer == correct_answer:
                     st.success("정답입니다!")
                     st.session_state.correct_answers += 1
                 else:
@@ -256,11 +256,22 @@ if st.button("새 문제 만들기"):
             st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
             st.stop()
         
+        # 정답이 옵션 중 하나인지 확인
+        if correct_answer not in options:
+            st.error("생성된 정답이 옵션에 없습니다. 다시 시도해 주세요.")
+            st.stop()
+        
         st.session_state.question = question
         st.session_state.dialogue = dialogue.strip()
         st.session_state.options = options
         st.session_state.correct_answer = correct_answer
         st.session_state.current_question = (question, options, correct_answer)
+        
+        # 디버깅을 위한 출력
+        st.write("생성된 문제 정보:")
+        st.write(f"질문: {question}")
+        st.write(f"옵션: {options}")
+        st.write(f"정답: {correct_answer}")
         
         # 새 대화에 대한 음성 생성 (남녀 목소리 구분)
         st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
