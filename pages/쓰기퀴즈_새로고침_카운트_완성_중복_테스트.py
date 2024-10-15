@@ -49,6 +49,11 @@ def generate_question():
     
     return blanked_sentence, translation, emoji, correct_word
 
+# 사이드바에 문제 수와 정답 수 표시
+st.sidebar.write("## 퀴즈 진행 상황")
+st.sidebar.write(f"총 문제 수: {st.session_state.total_questions}")
+st.sidebar.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
+
 st.header("✨인공지능 영어문장 퀴즈 선생님 퀴즐링🕵️‍♀️")
 st.subheader("어제 한 일에 대해 묻고 답하기 영어쓰기 퀴즈🚵‍♂️")
 st.divider()
@@ -87,9 +92,6 @@ if st.session_state.current_question is not None:
         st.markdown(f"### 정답 문장: {full_sentence} {emoji}")
         
         st.session_state.current_question = None
-
-    # 문제 수와 정답 수 표시 (하단에만 표시)
-    st.write(f"총 문제 수: {st.session_state.total_questions}  맞춘 문제 수: {st.session_state.correct_answers}")
 
 # "새 문제 만들기" 버튼
 if st.button("새 문제 만들기"):
