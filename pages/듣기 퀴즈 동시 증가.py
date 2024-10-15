@@ -7,39 +7,37 @@ import re
 # OpenAI 클라이언트 초기화
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
-# 듣기 퀴즈 상태 초기화
-if 'listening_quiz_state' not in st.session_state:
-    st.session_state.listening_quiz_state = {
-        'total_questions': 0,
-        'correct_answers': 0,
-        'current_question': None,
-        'audio_tags': None,
-        'question': None,
-        'options': None,
-        'correct_answer': None,
-        'dialogue': None,
-        'initialized': False
-    }
-
-# 앱이 로드될 때마다 초기화
-if not st.session_state.listening_quiz_state['initialized']:
-    st.session_state.listening_quiz_state = {
-        'total_questions': 0,
-        'correct_answers': 0,
-        'current_question': None,
-        'audio_tags': None,
-        'question': None,
-        'options': None,
-        'correct_answer': None,
-        'dialogue': None,
-        'initialized': True
-    }
-
 # 캐릭터와 성별 정의
 characters = {
     "Marie": "female", "Yena": "female", "Emma": "female", "Linh": "female",
     "Juwon": "male", "Dave": "male", "Chanho": "male"
 }
+
+# 세션 상태 초기화
+if 'listening_quiz_total_questions' not in st.session_state:
+    st.session_state.listening_quiz_total_questions = 0
+if 'listening_quiz_correct_answers' not in st.session_state:
+    st.session_state.listening_quiz_correct_answers = 0
+if 'listening_quiz_current_question' not in st.session_state:
+    st.session_state.listening_quiz_current_question = None
+
+# 사이드바 컨테이너 생성
+if 'listening_quiz_sidebar_placeholder' not in st.session_state:
+    st.session_state.listening_quiz_sidebar_placeholder = st.sidebar.empty()
+
+# 사이드바 업데이트 함수
+def update_sidebar():
+    st.session_state.listening_quiz_sidebar_placeholder.empty()
+    with st.session_state.listening_quiz_sidebar_placeholder.container():
+        st.write("## 듣기퀴즈 진행상황")
+        st.write(f"총 문제 수: {st.session_state.listening_quiz_total_questions}")
+        st.write(f"맞춘 문제 수: {st.session_state.listening_quiz_correct_answers}")
+        if st.session_state.listening_quiz_total_questions > 0:
+            accuracy = int((st.session_state.listening_quiz_correct_answers / st.session_state.listening_quiz_total_questions) * 100)
+            st.write(f"정확도: {accuracy}%")
+
+# 초기 사이드바 설정
+update_sidebar()
 
 def generate_question():
     questions = [
@@ -119,12 +117,12 @@ def split_dialogue(text):
     lines = text.strip().split('\n')
     speakers = {}
     for line in lines:
-        match = re.match(r'([A-Za-z]+):\s*(.*)', line)
+        match = re.match(r'([A-Z]):\s*(.*)', line)
         if match:
             speaker, content = match.groups()
             if speaker not in speakers:
                 speakers[speaker] = []
-            speakers[speaker].append(content.strip())
+            speakers[speaker].append(content)
     return speakers
 
 def text_to_speech(text, speaker):
@@ -147,7 +145,7 @@ def generate_dialogue_audio(dialogue):
     
     for speaker, lines in speakers.items():
         text = " ".join(lines)
-        speaker_name = speaker.split(':')[0].strip()  # 대화에서 화자 이름 추출
+        speaker_name = re.search(r'([A-Za-z]+):', lines[0]).group(1)  # 대화에서 화자 이름 추출
         audio_tag = text_to_speech(text, speaker_name)
         audio_tags.append(audio_tag)
     
@@ -195,39 +193,37 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     """
     ,  unsafe_allow_html=True)
 
-if st.session_state.listening_quiz_state['current_question'] is not None:
+if st.session_state.listening_quiz_current_question is not None:
     st.markdown("### 질문")
-    st.write(st.session_state.listening_quiz_state['question'])
+    st.write(st.session_state.question)
     
     st.markdown("### 대화 듣기")
     st.write("왼쪽부터 순서대로 들어보세요. 너무 빠르면 눈사람 버튼을 눌러 속도를 조절해보세요.")
-    st.markdown(st.session_state.listening_quiz_state['audio_tags'], unsafe_allow_html=True)
+    st.markdown(st.session_state.audio_tags, unsafe_allow_html=True)
     
     with st.form(key='answer_form'):
-        selected_option = st.radio("정답을 선택하세요:", st.session_state.listening_quiz_state['options'], index=None)
+        selected_option = st.radio("정답을 선택하세요:", st.session_state.options, index=None)
         submit_button = st.form_submit_button(label='정답 확인')
         
         if submit_button:
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
-                correct_answer = st.session_state.listening_quiz_state['correct_answer']
+                correct_answer = st.session_state.correct_answer
                 user_answer = selected_option
                 
-                st.session_state.listening_quiz_state['total_questions'] += 1
-                
+                st.session_state.listening_quiz_total_questions += 1
                 if user_answer == correct_answer:
                     st.success("정답입니다!")
-                    st.session_state.listening_quiz_state['correct_answers'] += 1
+                    st.session_state.listening_quiz_correct_answers += 1
                 else:
                     st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
                 
-                st.text(st.session_state.listening_quiz_state['dialogue'])
+                st.text(st.session_state.dialogue)
                 
-                st.session_state.listening_quiz_state['current_question'] = None
+                update_sidebar()
+                st.session_state.listening_quiz_current_question = None
             else:
                 st.warning("답을 선택해주세요.")
-else:
-    st.info("아래의 '새 문제 만들기' 버튼을 눌러 퀴즈를 시작하세요.")
 
 # "새 문제 만들기" 버튼
 if st.button("새 문제 만들기"):
@@ -236,11 +232,11 @@ if st.button("새 문제 만들기"):
             full_content = generate_question()
         
         if full_content is None:
-            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
+            st.error("문제 생성에 실패했습니다. 다시 시도해 주세요.")
             st.stop()
         
         if "[한국어 질문]" not in full_content:
-            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
+            st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
             st.stop()
         
         dialogue, question_part = full_content.split("[한국어 질문]")
@@ -256,28 +252,22 @@ if st.button("새 문제 만들기"):
                 break
         
         if not question or not options or not correct_answer:
-            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
+            st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
             st.stop()
         
         if correct_answer not in options:
-            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
+            st.error("생성된 정답이 옵션에 없습니다. 다시 시도해 주세요.")
             st.stop()
         
-        st.session_state.listening_quiz_state['current_question'] = (question, options, correct_answer)
-        st.session_state.listening_quiz_state['question'] = question
-        st.session_state.listening_quiz_state['options'] = options
-        st.session_state.listening_quiz_state['correct_answer'] = correct_answer
-        st.session_state.listening_quiz_state['dialogue'] = dialogue
-        st.session_state.listening_quiz_state['audio_tags'] = generate_dialogue_audio(dialogue)
+        st.session_state.question = question
+        st.session_state.dialogue = dialogue.strip()
+        st.session_state.options = options
+        st.session_state.correct_answer = correct_answer
+        st.session_state.listening_quiz_current_question = (question, options, correct_answer)
         
+        st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
+        
+        update_sidebar()
         st.rerun()
     except Exception as e:
-        st.error(f"오류가 발생했습니다. 다시 시도해 주세요.: {str(e)}")
-
-# 사이드바에 정답 카운트 표시
-st.sidebar.header("퀴즈 통계")
-st.sidebar.write(f"총 문제 수: {st.session_state.listening_quiz_state['total_questions']}")
-st.sidebar.write(f"맞춘 문제 수: {st.session_state.listening_quiz_state['correct_answers']}")
-if st.session_state.listening_quiz_state['total_questions'] > 0:
-    accuracy = int((st.session_state.listening_quiz_state['correct_answers'] / st.session_state.listening_quiz_state['total_questions']) * 100)
-    st.sidebar.write(f"정확도: {accuracy}%")
+        st.error(f"문제 생성 중 오류가 발생했습니다: {str(e)}")
