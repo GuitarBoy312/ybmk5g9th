@@ -67,9 +67,6 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     """
     , unsafe_allow_html=True)
 
-# 문제 수와 정답 수 표시
-st.write(f"총 문제 수: {st.session_state.total_questions}  맞춘 문제 수: {st.session_state.correct_answers}")
-
 if st.session_state.current_question is not None:
     blanked_sentence, translation, emoji, correct_word = st.session_state.current_question
     st.markdown(f"### {blanked_sentence} {emoji}")
