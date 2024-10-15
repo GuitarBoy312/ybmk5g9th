@@ -13,6 +13,29 @@ characters = {
     "Juwon": "male", "Dave": "male", "Chanho": "male"
 }
 
+# 세션 상태 초기화
+if 'total_questions' not in st.session_state:
+    st.session_state.total_questions = 0
+if 'correct_answers' not in st.session_state:
+    st.session_state.correct_answers = 0
+if 'current_question' not in st.session_state:
+    st.session_state.current_question = None
+
+# 사이드바 컨테이너 생성
+if 'sidebar_placeholder' not in st.session_state:
+    st.session_state.sidebar_placeholder = st.sidebar.empty()
+
+# 사이드바 업데이트 함수
+def update_sidebar():
+    st.session_state.sidebar_placeholder.empty()
+    with st.session_state.sidebar_placeholder.container():
+        st.write("## 퀴즈 진행 상황")
+        st.write(f"총 문제 수: {st.session_state.total_questions}")
+        st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
+
+# 초기 사이드바 설정
+update_sidebar()
+
 def generate_question():
     questions = [
         "What did you do yesterday, {name}?"
@@ -77,12 +100,15 @@ def generate_question():
     정답: (정답 선택지)
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        st.error(f"OpenAI API 호출 중 오류 발생: {str(e)}")
+        return None
 
 def split_dialogue(text):
     lines = text.strip().split('\n')
@@ -164,46 +190,10 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     """
     ,  unsafe_allow_html=True)
 
-# 세션 상태 초기화
-if 'question_generated' not in st.session_state:
-    st.session_state.question_generated = False
-
-if st.button("새 문제 만들기"):
-    # 세션 상태 초기화
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    
-    full_content = generate_question()
-    
-    dialogue, question_part = full_content.split("[한국어 질문]")
-    
-    question_lines = question_part.strip().split("\n")
-    question = question_lines[0].replace("질문:", "").strip() if question_lines else ""
-    options = question_lines[1:5] if len(question_lines) > 1 else []
-    correct_answer = ""
-    
-    for line in question_lines:
-        if line.startswith("정답:"):
-            correct_answer = line.replace("정답:", "").strip()
-            break
-    
-    st.session_state.question = question
-    st.session_state.dialogue = dialogue.strip()
-    st.session_state.options = options
-    st.session_state.correct_answer = correct_answer
-    st.session_state.question_generated = True
-    
-    # 새 대화에 대한 음성 생성 (남녀 목소리 구분)
-    st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
-    
-    # 페이지 새로고침
-    st.rerun()
-
-if 'question_generated' in st.session_state and st.session_state.question_generated:
+if st.session_state.current_question is not None:
     st.markdown("### 질문")
     st.write(st.session_state.question)
     
-    # 저장된 음성 태그 사용
     st.markdown("### 대화 듣기")
     st.write("왼쪽부터 순서대로 들어보세요. 너무 빠르면 눈사람 버튼을 눌러 속도를 조절해보세요.")
     st.markdown(st.session_state.audio_tags, unsafe_allow_html=True)
@@ -215,21 +205,71 @@ if 'question_generated' in st.session_state and st.session_state.question_genera
         if submit_button:
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
-                if selected_option.strip() == st.session_state.correct_answer.strip():  
+                # 정답 비교 로직 수정
+                correct_answer = st.session_state.correct_answer
+                user_answer = selected_option
+                
+                # 디버깅을 위한 출력
+                st.write(f"정답: {correct_answer}")
+                st.write(f"사용자 답변: {user_answer}")
+                
+                if user_answer == correct_answer:
                     st.success("정답입니다!")
-                    st.text(st.session_state.dialogue)
+                    st.session_state.correct_answers += 1
                 else:
-                    st.error(f"틀렸습니다. 정답은 {st.session_state.correct_answer}입니다.")
-                    st.text(st.session_state.dialogue)
-                    
-                    # 오답 설명 생성
-                    explanation = generate_explanation(
-                        st.session_state.question,
-                        st.session_state.correct_answer,
-                        selected_option,
-                        st.session_state.dialogue
-                    )
-                    st.markdown("### 오답 설명")
-                    st.write(explanation)
+                    st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
+                
+                st.text(st.session_state.dialogue)
+                
+                update_sidebar()
+                st.session_state.current_question = None
             else:
                 st.warning("답을 선택해주세요.")
+
+# "새 문제 만들기" 버튼을 페이지 맨 아래로 이동
+if st.button("새 문제 만들기"):
+    try:
+        with st.spinner("새로운 문제를 생성 중입니다..."):
+            full_content = generate_question()
+        
+        if full_content is None:
+            st.error("문제 생성에 실패했습니다. 다시 시도해 주세요.")
+            st.stop()
+        
+        if "[한국어 질문]" not in full_content:
+            st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
+            st.stop()
+        
+        dialogue, question_part = full_content.split("[한국어 질문]")
+        
+        question_lines = question_part.strip().split("\n")
+        question = question_lines[0].replace("질문:", "").strip() if question_lines else ""
+        options = [line.strip() for line in question_lines[1:5] if line.strip()]
+        correct_answer = ""
+        
+        for line in question_lines:
+            if line.startswith("정답:"):
+                correct_answer = line.replace("정답:", "").strip()
+                break
+        
+        if not question or not options or not correct_answer:
+            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
+            st.stop()
+        
+        if correct_answer not in options:
+            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
+            st.stop()
+        
+        st.session_state.question = question
+        st.session_state.dialogue = dialogue.strip()
+        st.session_state.options = options
+        st.session_state.correct_answer = correct_answer
+        st.session_state.current_question = (question, options, correct_answer)
+        
+        st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
+        
+        st.session_state.total_questions += 1
+        update_sidebar()
+        st.rerun()
+    except Exception as e:
+        st.error(f"문제 생성 중 오류가 발생했습니다: {str(e)}")
