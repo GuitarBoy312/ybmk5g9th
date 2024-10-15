@@ -32,6 +32,9 @@ def update_sidebar():
         st.write("## 퀴즈 진행 상황")
         st.write(f"총 문제 수: {st.session_state.total_questions}")
         st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
+        if st.session_state.total_questions > 0:
+            accuracy = int((st.session_state.correct_answers / st.session_state.total_questions) * 100)
+            st.write(f"정확도: {accuracy}%")
 
 # 초기 사이드바 설정
 update_sidebar()
@@ -253,11 +256,11 @@ if st.button("새 문제 만들기"):
                 break
         
         if not question or not options or not correct_answer:
-            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
+            st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
             st.stop()
         
         if correct_answer not in options:
-            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
+            st.error("생성된 정답이 옵션에 없습니다. 다시 시도해 주세요.")
             st.stop()
         
         st.session_state.question = question
