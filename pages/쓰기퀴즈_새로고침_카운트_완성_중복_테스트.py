@@ -27,6 +27,8 @@ if 'correct_answers' not in st.session_state:
     st.session_state.correct_answers = 0
 if 'current_question' not in st.session_state:
     st.session_state.current_question = None
+if 'sidebar_placeholder' not in st.session_state:
+    st.session_state.sidebar_placeholder = st.sidebar.empty()
 
 def generate_question():
     if st.session_state.current_question_index >= len(sentences):
@@ -49,14 +51,10 @@ def generate_question():
     
     return blanked_sentence, translation, emoji, correct_word
 
-# 전역 변수로 사이드바 컨테이너 생성
-sidebar_container = st.sidebar.container()
-
 # 사이드바 업데이트 함수
 def update_sidebar():
-    global sidebar_container
-    sidebar_container.empty()
-    with sidebar_container:
+    st.session_state.sidebar_placeholder.empty()
+    with st.session_state.sidebar_placeholder.container():
         st.write("## 퀴즈 진행 상황")
         st.write(f"총 문제 수: {st.session_state.total_questions}")
         st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
