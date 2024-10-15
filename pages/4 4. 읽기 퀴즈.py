@@ -28,7 +28,7 @@ if 'reading_quiz_sidebar_placeholder' not in st.session_state:
 def update_sidebar():
     st.session_state.reading_quiz_sidebar_placeholder.empty()
     with st.session_state.reading_quiz_sidebar_placeholder.container():
-        st.write("## 읽기퀴즈 진행상황")
+        st.write("## 읽기퀴즈 점수")
         st.write(f"총 문제 수: {st.session_state.reading_quiz_total_questions}")
         st.write(f"맞춘 문제 수: {st.session_state.reading_quiz_correct_answers}")
         if st.session_state.reading_quiz_total_questions > 0:
