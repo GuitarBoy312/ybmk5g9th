@@ -100,12 +100,15 @@ def generate_question():
     정답: (정답 선택지)
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        st.error(f"OpenAI API 호출 중 오류 발생: {str(e)}")
+        return None
 
 def split_dialogue(text):
     lines = text.strip().split('\n')
@@ -231,8 +234,14 @@ if st.button("새 문제 만들기"):
         with st.spinner("새로운 문제를 생성 중입니다..."):
             full_content = generate_question()
         
-        if "[한국어 질문]" not in full_content:
+        if full_content is None:
             st.error("문제 생성에 실패했습니다. 다시 시도해 주세요.")
+            st.stop()
+        
+        st.write("생성된 내용:", full_content)  # 디버깅을 위해 추가
+        
+        if "[한국어 질문]" not in full_content:
+            st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
             st.stop()
         
         dialogue, question_part = full_content.split("[한국어 질문]")
