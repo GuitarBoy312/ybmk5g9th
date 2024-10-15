@@ -49,14 +49,14 @@ def generate_question():
     
     return blanked_sentence, translation, emoji, correct_word
 
-# 사이드바 컨테이너 생성
-if 'sidebar_container' not in st.session_state:
-    st.session_state.sidebar_container = st.sidebar.container()
+# 전역 변수로 사이드바 컨테이너 생성
+sidebar_container = st.sidebar.container()
 
 # 사이드바 업데이트 함수
 def update_sidebar():
-    st.session_state.sidebar_container.empty()
-    with st.session_state.sidebar_container:
+    global sidebar_container
+    sidebar_container.empty()
+    with sidebar_container:
         st.write("## 퀴즈 진행 상황")
         st.write(f"총 문제 수: {st.session_state.total_questions}")
         st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
