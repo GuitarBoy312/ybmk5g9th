@@ -200,7 +200,7 @@ if st.session_state.listening_quiz_current_question is not None:
     st.markdown("### 질문")
     st.write(st.session_state.question)
     
-    st.markdown("### 대화 ���기")
+    st.markdown("### 대화 듣기")
     st.write("왼쪽부터 순서대로 들어보세요. 너무 빠르면 눈사람 버튼을 눌러 속도를 조절해보세요.")
     st.markdown(st.session_state.audio_tags, unsafe_allow_html=True)
     
@@ -234,11 +234,11 @@ if st.button("새 문제 만들기"):
             full_content = generate_question()
         
         if full_content is None:
-            st.error("문제 생성에 실패했습니다. 다시 시도해 주세요.")
+            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
             st.stop()
         
         if "[한국어 질문]" not in full_content:
-            st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
+            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
             st.stop()
         
         dialogue, question_part = full_content.split("[한국어 질문]")
@@ -254,11 +254,11 @@ if st.button("새 문제 만들기"):
                 break
         
         if not question or not options or not correct_answer:
-            st.error("문제 형식이 올바르지 않습니다. 다시 시도해 주세요.")
+            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
             st.stop()
         
         if correct_answer not in options:
-            st.error("생성된 정답이 옵션에 없습니다. 다시 시도해 주세요.")
+            st.error("오류가 발생했습니다. 다시 시도해 주세요.")
             st.stop()
         
         st.session_state.question = question
@@ -273,7 +273,7 @@ if st.button("새 문제 만들기"):
         update_sidebar()
         st.rerun()
     except Exception as e:
-        st.error(f"문제 생성 중 오류가 발생했습니다: {str(e)}")
+        st.error(f"오류가 발생했습니다. 다시 시도해 주세요.: {str(e)}")
 
 # 세션 초기화 버튼 (선택적)
 if st.button("퀴즈 통계 초기화"):
