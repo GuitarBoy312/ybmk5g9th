@@ -33,8 +33,8 @@ def update_sidebar():
         st.write(f"총 문제 수: {st.session_state.total_questions}")
         st.write(f"맞춘 문제 수: {st.session_state.correct_answers}")
         if st.session_state.total_questions > 0:
-            accuracy = (st.session_state.correct_answers / st.session_state.total_questions) * 100
-            st.write(f"정확도: {accuracy:.2f}%")
+            accuracy = int((st.session_state.correct_answers / st.session_state.total_questions) * 100)
+            st.write(f"정확도: {accuracy}%")
 
 # 초기 사이드바 설정
 update_sidebar()
