@@ -55,7 +55,7 @@ def generate_question():
 def update_sidebar():
     st.session_state.writing_quiz_sidebar_placeholder.empty()
     with st.session_state.writing_quiz_sidebar_placeholder.container():
-        st.write("## 쓰기퀴즈 진행상황")
+        st.write("## 퀴즈 진행 상황")
         st.write(f"총 문제 수: {st.session_state.writing_quiz_total_questions}")
         st.write(f"맞춘 문제 수: {st.session_state.writing_quiz_correct_answers}")
         if st.session_state.writing_quiz_total_questions > 0:
@@ -91,23 +91,26 @@ if st.session_state.writing_quiz_current_question is not None:
     user_answer = st.text_input("빈칸에 들어갈 단어를 입력하세요:")
 
     if st.button("정답 확인"):
-        st.write(f"입력한 답: {user_answer}")
-        
-        if user_answer.lower() == correct_word.lower():
-            st.success("정답입니다!")
-            st.session_state.writing_quiz_correct_answers += 1
+        if user_answer:  # 사용자가 답을 입력했는지 확인
+            st.write(f"입력한 답: {user_answer}")
+            
+            st.session_state.writing_quiz_total_questions += 1
+            if user_answer.lower() == correct_word.lower():
+                st.success("정답입니다!")
+                st.session_state.writing_quiz_correct_answers += 1
+            else:
+                st.error(f"틀렸습니다. 정답은 {correct_word}입니다.")
+            
+            full_sentence = blanked_sentence.replace('_____', correct_word)
+            st.markdown(f"### 정답 문장: {full_sentence} {emoji}")
+            
             update_sidebar()
+            st.session_state.writing_quiz_current_question = None
         else:
-            st.error(f"틀렸습니다. 정답은 {correct_word}입니다.")
-        
-        full_sentence = blanked_sentence.replace('_____', correct_word)
-        st.markdown(f"### 정답 문장: {full_sentence} {emoji}")
-        
-        st.session_state.writing_quiz_current_question = None
+            st.warning("답을 입력해주세요.")
 
 # "새 문제 만들기" 버튼
 if st.button("새 문제 만들기"):
     st.session_state.writing_quiz_current_question = generate_question()
-    st.session_state.writing_quiz_total_questions += 1
     update_sidebar()
     st.rerun()
