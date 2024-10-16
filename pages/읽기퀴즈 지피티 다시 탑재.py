@@ -42,22 +42,21 @@ def generate_essay_question():
     name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
     
     activities = {
-        "배드민턴을 치면서": "I enjoyed the game with my friends.",
-        "영화를 보면서": "It was a thrilling action film.",
-        "자동차를 만들면서": "It was a small toy car model.",
-        "낚시를 하면서": "I caught three fish at the lake.",
-        "쇼핑을 하면서": "I bought some new clothes.",
-        "박물관에 가면서": "I learned about ancient history.",
-        "축구를 하면서": "Our team won the match.",
-        "야구를 하면서": "I hit a home run.",
-        "한국 역사를 공부하면서": "I read a book about the Joseon Dynasty.",
-        "우주 센터에 가면서": "I saw real rockets there."
+        "배드민턴을 치면서": "I played badminton. I enjoyed the game with my friends.",
+        "영화를 보면서": "I watched a movie. It was a thrilling action film.",
+        "자동차를 만들면서": "I made a car. It was a small toy car model.",
+        "낚시를 하면서": "I went fishing. I caught three fish at the lake.",
+        "쇼핑을 하면서": "I went shopping. I bought some new clothes.",
+        "박물관에 가면서": "I went to the museum. I learned about ancient history.",
+        "축구를 하면서": "I played soccer. Our team won the match.",
+        "야구를 하면서": "I played baseball. I hit a home run.",
+        "한국 역사를 공부하면서": "I learned about Korean history. I read a book about the Joseon Dynasty.",
+        "우주 센터에 가면서": "I went to the space center. I saw real rockets there."
     }
     
-    activity, second_sentence = random.choice(list(activities.items()))
+    activity, dialogue = random.choice(list(activities.items()))
     
     question_format = f"{name}은 {activity} 무엇을 했나요?"
-    dialogue = f"I {activity[:-3]}. {second_sentence}"
     
     korean_options = [
         "친구들과 게임을 즐겼다",
@@ -277,7 +276,7 @@ def main():
     with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 👆✅", expanded=False):
         st.markdown(
     """     
-    1️⃣ [새 문제 만들기] 버튼을 눌러 문제 만들기.<br>
+    1️⃣ [새 문제 만들기] 버튼을 눌��� 문제 만들기.<br>
     2️⃣ 질문과 대화를 읽어보기<br> 
     3️⃣ 정답을 선택하고 [정답 확인] 버튼 누르기.<br>
     4️⃣ 정답 확인하기.<br>
