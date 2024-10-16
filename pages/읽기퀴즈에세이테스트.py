@@ -40,8 +40,10 @@ update_sidebar()
 
 def generate_gpt_question(essay):
     prompt = f"""
-    다음 짧은 에세이를 읽고, 이에 대한 한국어 독해 질문을 생성해주세요. 
+    다음 짧은 영어 에세이를 읽고, 이에 대한 구체적인 한국어 독해 질문을 생성해주세요. 
     질문은 에세이의 내용을 정확히 이해했는지 확인할 수 있는 것이어야 합니다.
+    질문은 '누가', '어디서', '무엇을', '어떻게' 등의 구체적인 정보를 물어보는 형식이어야 합니다.
+    또한, 질문에 대한 답이 에세이 내용에서 명확히 찾을 수 있어야 합니다.
     
     에세이:
     {essay}
@@ -52,7 +54,7 @@ def generate_gpt_question(essay):
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "당신은 영어 교육 전문가입니다. 주어진 영어 에세이에 대한 적절한 한국어 독해 질문을 생성해야 합니다."},
+            {"role": "system", "content": "당신은 영어 교육 전문가입니다. 주어진 영어 에세이에 대한 구체적이고 적절한 한국어 독해 질문을 생성해야 합니다."},
             {"role": "user", "content": prompt}
         ]
     )
@@ -104,35 +106,21 @@ def generate_essay_question():
 
     question = generate_gpt_question(essay)
 
-    correct_answer = activity.split()[1] if ' ' in activity else activity
-    wrong_answers = random.sample([a.split()[1] if ' ' in a else a for a in activities if a != activity], 3)
+    # 정답과 오답 생성 로직 수정
+    words = essay.split()
+    correct_answer = random.choice([word for word in words if len(word) > 3 and word.isalpha()])
+    wrong_answers = random.sample([word for word in words if word != correct_answer and len(word) > 3 and word.isalpha()], 3)
     options = [correct_answer] + wrong_answers
     random.shuffle(options)
-
-    korean_activities = {
-        "badminton": "배드민턴",
-        "movie": "영화",
-        "car": "자동차",
-        "fishing": "낚시",
-        "shopping": "쇼핑",
-        "museum": "박물관",
-        "soccer": "축구",
-        "baseball": "야구",
-        "history": "역사",
-        "center": "센터"
-    }
-
-    korean_options = [korean_activities.get(opt, opt) for opt in options]
-    correct_answer = korean_activities.get(correct_answer, correct_answer)
 
     return f"""
 질문: {question}
 대화: {essay}
-1. {korean_options[0]}
-2. {korean_options[1]}
-3. {korean_options[2]}
-4. {korean_options[3]}
-정답: {korean_options.index(correct_answer) + 1}
+1. {options[0]}
+2. {options[1]}
+3. {options[2]}
+4. {options[3]}
+정답: {options.index(correct_answer) + 1}
 """
 
 def generate_conversation_question():
