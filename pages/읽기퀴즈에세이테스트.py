@@ -104,30 +104,47 @@ def generate_essay_question():
     
     essay = f"""Yesterday, {name} {activity}. {additional_info[0]} {additional_info[1]}"""
 
-    question = f"{name}은 어제 무엇을 했나요?"
-    correct_answer = activity
+    # 다양한 질문 유형 생성
+    question_types = [
+        f"{name}은 어제 무엇을 했나요?",
+        f"{name}이(가) {activity.split()[-1]}에서 무엇을 했나요?",
+        f"{name}이(가) {activity.split()[-1]}에 가서 기분이 어땠나요?",
+        f"{name}이(가) 어제 한 활동은 무엇인가요?",
+        f"어제 {name}의 경험에 대해 어떤 것을 알 수 있나요?"
+    ]
 
-    # 오답 생성
-    wrong_answers = random.sample([a for a in activities if a != activity], 3)
-    options = [activity] + wrong_answers
-    random.shuffle(options)
+    question = random.choice(question_types)
 
-    # 선택지를 한국어로 변환
-    korean_activities = {
-        "played badminton": "배드민턴을 쳤다",
-        "watched a movie": "영화를 봤다",
-        "made a car": "자동차를 만들었다",
-        "went fishing": "낚시를 갔다",
-        "went shopping": "쇼핑을 갔다",
-        "went to the museum": "박물관에 갔다",
-        "played soccer": "축구를 했다",
-        "played baseball": "야구를 했다",
-        "learned about Korean history": "한국 역사를 배웠다",
-        "went to the space center": "우주 센터에 갔다"
-    }
+    # 질문 유형에 따라 정답과 오답 생성
+    if "무엇을 했나요?" in question or "활동은 무엇인가요?" in question:
+        correct_answer = activity
+        wrong_answers = random.sample([a for a in activities if a != activity], 3)
+        options = [activity] + wrong_answers
+        korean_activities = {
+            "played badminton": "배드민턴을 쳤다",
+            "watched a movie": "영화를 봤다",
+            "made a car": "자동차를 만들었다",
+            "went fishing": "낚시를 갔다",
+            "went shopping": "쇼핑을 갔다",
+            "went to the museum": "박물관에 갔다",
+            "played soccer": "축구를 했다",
+            "played baseball": "야구를 했다",
+            "learned about Korean history": "한국 역사를 배웠다",
+            "went to the space center": "우주 센터에 갔다"
+        }
+        korean_options = [korean_activities[opt] for opt in options]
+        correct_answer = korean_activities[correct_answer]
+    elif "기분이 어땠나요?" in question:
+        feelings = ["즐거웠다", "흥미로웠다", "신났다", "재미있었다"]
+        correct_answer = random.choice(feelings)
+        wrong_answers = random.sample([f for f in feelings if f != correct_answer], 3)
+        korean_options = [correct_answer] + wrong_answers
+    else:  # "경험에 대해 어떤 것을 알 수 있나요?"
+        correct_answer = additional_info[0]
+        wrong_answers = random.sample([a for a in additional_info if a != correct_answer] + ["It was boring", "It was a waste of time", "It was too difficult"], 3)
+        korean_options = [correct_answer] + wrong_answers
 
-    korean_options = [korean_activities[opt] for opt in options]
-    correct_answer = korean_activities[correct_answer]
+    random.shuffle(korean_options)
 
     return f"""
 질문: {question}
