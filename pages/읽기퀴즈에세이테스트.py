@@ -142,7 +142,19 @@ def generate_essay_question():
     else:  # "경험에 대해 어떤 것을 알 수 있나요?"
         correct_answer = additional_info[0]
         wrong_answers = random.sample([a for a in additional_info if a != correct_answer] + ["It was boring", "It was a waste of time", "It was too difficult"], 3)
-        korean_options = [correct_answer] + wrong_answers
+        
+        # 영어 문장을 한국어로 번역
+        korean_translations = {
+            "It was boring": "지루했다",
+            "It was a waste of time": "시간 낭비였다",
+            "It was too difficult": "너무 어려웠다"
+        }
+        
+        def translate_to_korean(sentence):
+            return korean_translations.get(sentence, generate_gpt_translation(sentence))
+
+        korean_options = [translate_to_korean(answer) for answer in [correct_answer] + wrong_answers]
+        correct_answer = korean_options[0]
 
     random.shuffle(korean_options)
 
@@ -155,6 +167,19 @@ def generate_essay_question():
 4. {korean_options[3]}
 정답: {korean_options.index(correct_answer) + 1}
 """
+
+def generate_gpt_translation(sentence):
+    prompt = f"다음 영어 문장을 한국어로 번역해주세요: '{sentence}'"
+    
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "당신은 전문 번역가입니다. 주어진 영어 문장을 자연스러운 한국어로 번역해야 합니다."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    return response.choices[0].message.content.strip()
 
 def generate_conversation_question():
     names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
@@ -369,7 +394,7 @@ def main():
         else:
             dialogue, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "conversation")
             
-            st.markdown("### 질문")
+            st.markdown("### ��문")
             st.write(question)
             
             st.divider()
