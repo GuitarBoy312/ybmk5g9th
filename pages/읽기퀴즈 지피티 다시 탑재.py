@@ -42,22 +42,22 @@ def generate_essay_question():
     name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
     
     activities = {
-        "배드민턴을 쳤다": "I enjoyed the game with my friends.",
-        "영화를 봤다": "It was a thrilling action film.",
-        "자동차를 만들었다": "It was a small toy car model.",
-        "낚시를 갔다": "I caught three fish at the lake.",
-        "쇼핑을 갔다": "I bought some new clothes.",
-        "박물관에 갔다": "I learned about ancient history.",
-        "축구를 했다": "Our team won the match.",
-        "야구를 했다": "I hit a home run.",
-        "한국 역사를 공부했다": "I read a book about the Joseon Dynasty.",
-        "우주 센터에 갔다": "I saw real rockets there."
+        "배드민턴을 치면서": "I enjoyed the game with my friends.",
+        "영화를 보면서": "It was a thrilling action film.",
+        "자동차를 만들면서": "It was a small toy car model.",
+        "낚시를 하면서": "I caught three fish at the lake.",
+        "쇼핑을 하면서": "I bought some new clothes.",
+        "박물관에 가면서": "I learned about ancient history.",
+        "축구를 하면서": "Our team won the match.",
+        "야구를 하면서": "I hit a home run.",
+        "한국 역사를 공부하면서": "I read a book about the Joseon Dynasty.",
+        "우주 센터에 가면서": "I saw real rockets there."
     }
     
     activity, second_sentence = random.choice(list(activities.items()))
     
-    question_format = f"{name}은 {activity}하면서 무엇을 했나요?"
-    dialogue = f"I {activity}. {second_sentence}"
+    question_format = f"{name}은 {activity} 무엇을 했나요?"
+    dialogue = f"I {activity[:-3]}. {second_sentence}"
     
     korean_options = [
         "친구들과 게임을 즐겼다",
