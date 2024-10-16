@@ -40,16 +40,17 @@ SYSTEM_MESSAGE = {
     '''
 }
 
-# 초기화 함수
+# 초기화 함수 수정
 def initialize_session():
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.session_state['openai_client'] = OpenAI(api_key=st.secrets["openai_api_key"])
     st.session_state['chat_history'] = [SYSTEM_MESSAGE]
     st.session_state['initialized'] = True
+    st.session_state['page'] = '대화 훈련'  # 현재 페이지 표시
 
-# 세션 상태 초기화
-if 'initialized' not in st.session_state or not st.session_state['initialized']:
+# 세션 상태 초기화 로직 수정
+if 'initialized' not in st.session_state or not st.session_state['initialized'] or st.session_state.get('page') != '대화 훈련':
     initialize_session()
 
 # ChatGPT API 호출
