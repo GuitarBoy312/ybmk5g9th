@@ -339,26 +339,25 @@ def main():
     """
     ,  unsafe_allow_html=True)
 
-    # 난이도 선택을 main 함수의 시작 부분으로 이동
-    difficulty = st.radio("난이도를 선택하세요:", ("기본", "심화"), key="difficulty")
+    # 난이도 선택을 드롭다운으로 변경
+    difficulty = st.selectbox("난이도를 선택하세요:", ("기본", "심화"), key="difficulty")
 
     if 'reading_quiz_current_question' not in st.session_state or st.session_state.reading_quiz_current_question is None:
         st.session_state.reading_quiz_current_question, st.session_state.reading_quiz_current_question_type = generate_question()
 
     if st.session_state.reading_quiz_current_question:
-        if st.session_state.reading_quiz_current_question_type == "essay":
-            display_question("essay")
-        else:
-            display_question("conversation")
+        display_question(st.session_state.reading_quiz_current_question_type)
 
     st.divider()
 
     if st.button("새 문제 만들기"):
         with st.spinner("새로운 문제를 생성 중입니다..."):
             if difficulty == "기본":
-                st.session_state.reading_quiz_current_question, _ = generate_conversation_question(), "conversation"
+                st.session_state.reading_quiz_current_question = generate_conversation_question()
+                st.session_state.reading_quiz_current_question_type = "conversation"
             else:
-                st.session_state.reading_quiz_current_question, _ = generate_essay_question(), "essay"
+                st.session_state.reading_quiz_current_question = generate_essay_question()
+                st.session_state.reading_quiz_current_question_type = "essay"
             st.session_state.question_answered = False
         st.rerun()
 
