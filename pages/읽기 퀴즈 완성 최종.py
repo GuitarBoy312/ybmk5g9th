@@ -294,31 +294,30 @@ def display_question(question_type):
         selected_option = st.radio("", options, index=None)
         submit_button = st.form_submit_button(label='정답 확인')
 
-        if submit_button:
+        if submit_button and not st.session_state.question_answered:
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
-                if not st.session_state.question_answered:
-                    st.session_state.reading_quiz_total_questions += 1
-                    is_correct = (question_type == "essay" and int(selected_option.split('.')[0].strip()) == correct_answer) or \
-                                 (question_type == "conversation" and selected_option.split('.')[0].strip() == correct_answer)
-                    
-                    if is_correct:
-                        st.success("정답입니다!")
-                        st.session_state.reading_quiz_correct_answers += 1
-                    else:
-                        st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
-                        if question_type == "essay":
-                            explanation = get_explanation_essay(question, passage, correct_answer, selected_option)
-                        else:
-                            explanation = get_explanation_dialogue(question, dialogue, correct_answer, selected_option)
-                        st.write(explanation)
-                    
-                    update_sidebar()
-                    st.session_state.question_answered = True
+                st.session_state.question_answered = True
+                st.session_state.reading_quiz_total_questions += 1
+                is_correct = (question_type == "essay" and int(selected_option.split('.')[0].strip()) == correct_answer) or \
+                             (question_type == "conversation" and selected_option.split('.')[0].strip() == correct_answer)
+                
+                if is_correct:
+                    st.success("정답입니다!")
+                    st.session_state.reading_quiz_correct_answers += 1
                 else:
-                    st.warning("이미 답변을 제출했습니다. 새 문제를 만들어주세요.")
+                    st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
+                    if question_type == "essay":
+                        explanation = get_explanation_essay(question, passage, correct_answer, selected_option)
+                    else:
+                        explanation = get_explanation_dialogue(question, dialogue, correct_answer, selected_option)
+                    st.write(explanation)
+                
+                update_sidebar()
             else:
                 st.warning("답을 선택해주세요.")
+        elif st.session_state.question_answered:
+            st.warning("이미 답변을 제출했습니다. 새 문제를 만들어주세요.")
 
 def main():
     st.header("✨인공지능 영어 퀴즈 선생님 퀴즐링🕵️‍♀️")
@@ -348,20 +347,20 @@ def main():
 
     st.divider()
 
-    # 난이도 선택 버튼과 새 문제 만들기 버튼을 맨 아래로 이동
+    # 난이도 선택 버튼��� 새 문제 만들기 버튼을 맨 아래로 이동
     difficulty = st.radio("난이도를 선택하세요:", ("기본", "심화"), key="difficulty")
     
-    # 난이도가 변경되었을 때 question_answered 상태 초기화
-    if 'previous_difficulty' not in st.session_state:
-        st.session_state.previous_difficulty = difficulty
-    
-    if st.session_state.previous_difficulty != difficulty:
-        st.session_state.previous_difficulty = difficulty
-        st.session_state.question_answered = False
-        generate_new_question(difficulty)
-
-    if st.button("새 문제 만들기"):
-        generate_new_question(difficulty)
+    if st.button("새 문제 만들기") or st.session_state.get('difficulty') != difficulty:
+        with st.spinner("새로운 문제를 생성 중입니다..."):
+            if difficulty == "기본":
+                st.session_state.reading_quiz_current_question = generate_conversation_question()
+                st.session_state.reading_quiz_current_question_type = "conversation"
+            else:
+                st.session_state.reading_quiz_current_question = generate_essay_question()
+                st.session_state.reading_quiz_current_question_type = "essay"
+            st.session_state.question_answered = False
+            st.session_state.difficulty = difficulty
+        st.rerun()
 
 if __name__ == "__main__":
     main()
