@@ -55,7 +55,7 @@ def generate_question():
 def update_sidebar():
     st.session_state.writing_quiz_sidebar_placeholder.empty()
     with st.session_state.writing_quiz_sidebar_placeholder.container():
-        st.write("## 퀴즈 점수")
+        st.write("## 쓰기퀴즈 점수")
         st.write(f"총 문제 수: {st.session_state.writing_quiz_total_questions}")
         st.write(f"맞춘 문제 수: {st.session_state.writing_quiz_correct_answers}")
         if st.session_state.writing_quiz_total_questions > 0:
