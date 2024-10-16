@@ -2,15 +2,15 @@ import streamlit as st
 from openai import OpenAI
 import random
 import base64
-import re
+import io
 
 # OpenAI 클라이언트 초기화 (TTS용)
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
-# 캐릭터 이름 목록과 음성 매핑
+# 캐릭터 이름 목록과 성별
 characters = {
-    "Marie": "nova", "Yena": "shimmer", "Emma": "alloy", "Linh": "nova",
-    "Juwon": "echo", "Dave": "onyx", "Chanho": "fable"
+    "Marie": "female", "Yena": "female", "Emma": "female", "Linh": "female",
+    "Juwon": "male", "Dave": "male", "Chanho": "male"
 }
 
 # 활동 목록
@@ -78,33 +78,38 @@ def generate_question():
         "speaker_b": speaker_b
     }
 
-def text_to_speech(text, voice):
+def text_to_speech(text, gender):
+    voice = "onyx" if gender == "male" else "alloy"
     try:
         response = client.audio.speech.create(
             model="tts-1",
             voice=voice,
             input=text
         )
-        
-        audio_bytes = response.content
-        audio_base64 = base64.b64encode(audio_bytes).decode()
-        audio_tag = f'<audio controls><source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3"></audio>'
-        
-        return audio_tag
+        return response.content
     except Exception as e:
         st.error(f"음성 생성 중 오류가 발생했습니다: {str(e)}")
-        return ""
+        return None
 
 def generate_dialogue_audio(dialogue, speaker_a, speaker_b):
     lines = dialogue.split('\n')
-    audio_tags = []
+    audio_contents = []
     
     for line in lines:
         speaker, text = line.split(': ', 1)
-        voice = characters[speaker]
-        audio_tag = text_to_speech(text, voice)
-        audio_tags.append(audio_tag)
+        gender = characters[speaker]
+        audio_content = text_to_speech(text, gender)
+        if audio_content:
+            audio_contents.append(audio_content)
     
+    return audio_contents
+
+def create_audio_players(audio_contents):
+    audio_tags = []
+    for i, content in enumerate(audio_contents):
+        audio_base64 = base64.b64encode(content).decode()
+        audio_tag = f'<audio controls><source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3"></audio>'
+        audio_tags.append(audio_tag)
     return "".join(audio_tags)
 
 # Streamlit UI
@@ -171,7 +176,8 @@ if st.button("새 문제 만들기"):
         st.session_state.correct_answer = qa_set["correct_answer"]
         st.session_state.listening_quiz_current_question = (qa_set["question"], qa_set["options"], qa_set["correct_answer"])
         
-        st.session_state.audio_tags = generate_dialogue_audio(qa_set["dialogue"], qa_set["speaker_a"], qa_set["speaker_b"])
+        audio_contents = generate_dialogue_audio(qa_set["dialogue"], qa_set["speaker_a"], qa_set["speaker_b"])
+        st.session_state.audio_tags = create_audio_players(audio_contents)
         
         update_sidebar()
         st.rerun()
