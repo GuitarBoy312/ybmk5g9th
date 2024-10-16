@@ -104,22 +104,39 @@ def generate_essay_question():
     
     essay = f"""Yesterday, {name} {activity}. {additional_info[0]} {additional_info[1]}"""
 
-    question = generate_gpt_question(essay)
+    question = f"{name}은 어제 무엇을 했나요?"
+    correct_answer = activity
 
-    # 정답과 오답 생성 로직 수정
-    correct_answer = name
-    wrong_answers = random.sample([n for n in names if n != name], 3)
-    options = [correct_answer] + wrong_answers
+    # 오답 생성
+    wrong_answers = random.sample([a for a in activities if a != activity], 3)
+    options = [activity] + wrong_answers
     random.shuffle(options)
+
+    # 선택지를 한국어로 변환
+    korean_activities = {
+        "played badminton": "배드민턴을 쳤다",
+        "watched a movie": "영화를 봤다",
+        "made a car": "자동차를 만들었다",
+        "went fishing": "낚시를 갔다",
+        "went shopping": "쇼핑을 갔다",
+        "went to the museum": "박물관에 갔다",
+        "played soccer": "축구를 했다",
+        "played baseball": "야구를 했다",
+        "learned about Korean history": "한국 역사를 배웠다",
+        "went to the space center": "우주 센터에 갔다"
+    }
+
+    korean_options = [korean_activities[opt] for opt in options]
+    correct_answer = korean_activities[correct_answer]
 
     return f"""
 질문: {question}
 대화: {essay}
-1. {options[0]}
-2. {options[1]}
-3. {options[2]}
-4. {options[3]}
-정답: {options.index(correct_answer) + 1}
+1. {korean_options[0]}
+2. {korean_options[1]}
+3. {korean_options[2]}
+4. {korean_options[3]}
+정답: {korean_options.index(correct_answer) + 1}
 """
 
 def generate_conversation_question():
