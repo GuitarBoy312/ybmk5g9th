@@ -79,7 +79,7 @@ def generate_question():
     }
 
 def text_to_speech(text, gender):
-    voice = "onyx" if gender == "male" else "alloy"
+    voice = "echo" if gender == "male" else "alloy"
     try:
         response = client.audio.speech.create(
             model="tts-1",
