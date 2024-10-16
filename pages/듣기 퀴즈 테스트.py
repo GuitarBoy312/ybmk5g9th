@@ -4,14 +4,24 @@ import random
 import base64
 import re
 
-# OpenAI 클라이언트 초기화
+# OpenAI 클라이언트 초기화 (TTS용)
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
-# 캐릭터와 성별 정의
-characters = {
-    "Marie": "female", "Yena": "female", "Emma": "female", "Linh": "female",
-    "Juwon": "male", "Dave": "male", "Chanho": "male"
-}
+# 캐릭터 이름 목록
+characters = ["Marie", "Yena", "Emma", "Linh", "Juwon", "Dave", "Chanho"]
+
+# 활동 목록
+activities = [
+    ("배드민턴을 쳤다.", "played badminton. 🏸"),
+    ("영화를 봤다.", "watched a movie. 🎬"),
+    ("쇼핑을 갔다.", "went shopping. 🛍️"),
+    ("박물관에 갔다.", "went to the museum. 🏛️"),
+    ("축구를 했다.", "played soccer. ⚽"),
+    ("낚시를 갔다.", "went fishing. 🎣"),
+    ("역사를 공부했다.", "studied history. 📚"),
+    ("우주 센터에 갔다.", "went to the space center. 🚀"),
+    ("자동차를 만들었다.", "made a car. 🚗")
+]
 
 # 세션 상태 초기화
 if 'listening_quiz_total_questions' not in st.session_state:
@@ -41,94 +51,34 @@ def update_sidebar():
 # 초기 사이드바 설정
 update_sidebar()
 
-# 미리 정의된 선택지 (모두 한국어로)
-predefined_options = [
-    "배드민턴을 쳤다.",
-    "영화를 봤다.",
-    "쇼핑을 갔다.",
-    "박물관에 갔다.",
-    "축구를 했다.",
-    "낚시를 갔다.",
-    "역사를 공부했다.",
-    "우주 센터에 갔다.",
-    "자동차를 만들었다."
-]
-
 def generate_question():
+    speaker_a = random.choice(characters)
+    speaker_b = random.choice([c for c in characters if c != speaker_a])
+    
+    correct_activity = random.choice(activities)
+    wrong_activities = random.sample([a for a in activities if a != correct_activity], 3)
+    
+    all_options = [correct_activity] + wrong_activities
+    random.shuffle(all_options)
+    
+    options = [f"{chr(65 + i)}. {option[0]}" for i, option in enumerate(all_options)]
+    correct_answer = next(opt for opt in options if correct_activity[0] in opt)
+    
+    dialogue = f"{speaker_a}: What did you do yesterday, {speaker_b}?\n{speaker_b}: I {correct_activity[1]}"
+    question = f"{speaker_b}는 어제 무엇을 했나요?"
+    
+    return {
+        "question": question,
+        "dialogue": dialogue,
+        "options": options,
+        "correct_answer": correct_answer
+    }
+
+def text_to_speech(text):
     try:
-        questions = [
-            "What did you do yesterday, {name}?"
-        ]
-        
-        answers = [
-            "I played badminton. 🏸",
-            "I watched a movie. 🎬",
-            "I went shopping. 🛍️",
-            "I went to the museum. 🏛️",
-            "I played soccer. ⚽",
-            "I went fishing. 🎣",
-            "I learned about Korean history. 📚",
-            "I went to the space center. 🚀",
-            "I made a car. 🚗"
-        ]
-        
-        korean_questions = [
-            "{name}은(는) 어제 무엇을 했나요?"
-        ]
-        
-        selected_question = random.choice(questions)
-        selected_answer = random.choice(answers)
-        selected_korean_question = random.choice(korean_questions)
-        
-        male_speakers = [name for name, gender in characters.items() if gender == "male"]
-        female_speakers = [name for name, gender in characters.items() if gender == "female"]
-        speaker_a = random.choice(male_speakers)
-        speaker_b = random.choice(female_speakers)
-        
-        if random.choice([True, False]):
-            speaker_a, speaker_b = speaker_b, speaker_a
-
-        formatted_question = selected_question.format(name=speaker_b)
-        
-        dialogue = f"""
-{speaker_a}: {formatted_question}
-{speaker_b}: {selected_answer}
-"""
-
-        correct_answer_korean = next((opt for opt in predefined_options if opt.split()[0] in selected_answer.lower()), random.choice(predefined_options))
-
-        wrong_options = random.sample([opt for opt in predefined_options if opt != correct_answer_korean], 3)
-        
-        all_options = [correct_answer_korean] + wrong_options
-        random.shuffle(all_options)
-
-        options = [f"{chr(65 + i)}. {option}" for i, option in enumerate(all_options)]
-
-        correct_answer = next(opt for opt in options if correct_answer_korean in opt)
-
-        return dialogue, selected_korean_question.format(name=speaker_b), options, correct_answer
-    except Exception as e:
-        st.error(f"문제 생성 중 오류가 발생했습니다: {str(e)}")
-        return None, None, None, None
-
-def split_dialogue(text):
-    lines = text.strip().split('\n')
-    speakers = {}
-    for line in lines:
-        match = re.match(r'([A-Z][a-z]+):\s*(.*)', line)
-        if match:
-            speaker, content = match.groups()
-            if speaker not in speakers:
-                speakers[speaker] = []
-            speakers[speaker].append(content)
-    return speakers
-
-def text_to_speech(text, speaker):
-    try:
-        voice = "nova" if characters[speaker] == "female" else "echo"
         response = client.audio.speech.create(
             model="tts-1",
-            voice=voice,
+            voice="nova",
             input=text
         )
         
@@ -139,21 +89,6 @@ def text_to_speech(text, speaker):
         return audio_tag
     except Exception as e:
         st.error(f"음성 생성 중 오류가 발생했습니다: {str(e)}")
-        return ""
-
-def generate_dialogue_audio(dialogue):
-    try:
-        speakers = split_dialogue(dialogue)
-        audio_tags = []
-        
-        for speaker, lines in speakers.items():
-            text = " ".join(lines)
-            audio_tag = text_to_speech(text, speaker)
-            audio_tags.append(audio_tag)
-        
-        return "".join(audio_tags)
-    except Exception as e:
-        st.error(f"대화 오디오 생성 중 오류가 발생했습니다: {str(e)}")
         return ""
 
 # Streamlit UI
@@ -212,20 +147,17 @@ if st.session_state.listening_quiz_current_question is not None:
 if st.button("새 문제 만들기"):
     try:
         with st.spinner("새로운 문제를 생성 중입니다..."):
-            dialogue, question, options, correct_answer = generate_question()
+            qa_set = generate_question()
+            
+        st.session_state.question = qa_set["question"]
+        st.session_state.dialogue = qa_set["dialogue"]
+        st.session_state.options = qa_set["options"]
+        st.session_state.correct_answer = qa_set["correct_answer"]
+        st.session_state.listening_quiz_current_question = (qa_set["question"], qa_set["options"], qa_set["correct_answer"])
         
-        if dialogue and question and options and correct_answer:
-            st.session_state.question = question
-            st.session_state.dialogue = dialogue.strip()
-            st.session_state.options = options
-            st.session_state.correct_answer = correct_answer
-            st.session_state.listening_quiz_current_question = (question, options, correct_answer)
-            
-            st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
-            
-            update_sidebar()
-            st.rerun()
-        else:
-            st.error("문제 생성에 실패했습니다. 다시 시도해주세요.")
+        st.session_state.audio_tags = text_to_speech(qa_set["dialogue"])
+        
+        update_sidebar()
+        st.rerun()
     except Exception as e:
         st.error(f"오류가 발생했습니다. 새문제 만들기 버튼을 다시 눌러주세요.: {str(e)}")
