@@ -52,8 +52,7 @@ def update_sidebar():
 update_sidebar()
 
 def generate_question():
-    speaker_a = random.choice(characters)
-    speaker_b = random.choice([c for c in characters if c != speaker_a])
+    speaker_a, speaker_b = random.sample(characters, 2)
     
     correct_activity = random.choice(activities)
     wrong_activities = random.sample([a for a in activities if a != correct_activity], 3)
@@ -94,7 +93,7 @@ def text_to_speech(text):
 # Streamlit UI
 
 st.header("✨인공지능 영어듣기 퀴즈 선생님 퀴즐링🕵️‍♀️")
-st.subheader("어제 한 일에 대해 묻고 답하기 영어듣기 퀴즈🚵‍♂️")
+st.subheader("어제 한 ��에 대해 묻고 답하기 영어듣기 퀴즈🚵‍♂️")
 st.divider()
 
 with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 👆✅", expanded=False):
