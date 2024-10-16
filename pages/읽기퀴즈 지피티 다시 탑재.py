@@ -86,10 +86,10 @@ def generate_essay_question():
         answer1, answer2 = random.choice(activities[location])
         question_format = f"{name}은 {location}에서 무엇을 했나요?"
 
-    dialogue = f"A: What did you do yesterday, {name}?\nB: {answer1} {answer2}"
+    dialogue = f"{answer1} {answer2}"
     
     correct_answer = answer2[:-1]  # 마지막 마침표 제거
-    wrong_answers = [act[1][:-1] for act in activities if act[1] != answer2]
+    wrong_answers = [act[1][:-1] for act in activities[location] if act[1] != answer2]
     options = random.sample(wrong_answers, 3) + [correct_answer]
     random.shuffle(options)
 
