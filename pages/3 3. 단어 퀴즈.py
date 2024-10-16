@@ -23,7 +23,16 @@ words = {
 }
 
 def generate_question():
-    word, meaning = random.choice(list(words.items()))
+    if not st.session_state.vocabulary_quiz_state['remaining_words']:
+        st.session_state.vocabulary_quiz_state['remaining_words'] = list(words.items())
+        st.session_state.vocabulary_quiz_state['round'] += 1
+        if st.session_state.vocabulary_quiz_state['round'] > 2:
+            st.session_state.vocabulary_quiz_state['quiz_completed'] = True
+            return None, None, None
+
+    word, meaning = random.choice(st.session_state.vocabulary_quiz_state['remaining_words'])
+    st.session_state.vocabulary_quiz_state['remaining_words'].remove((word, meaning))
+    
     is_english_to_korean = random.choice([True, False])
     
     if is_english_to_korean:
@@ -50,7 +59,10 @@ if 'vocabulary_quiz_state' not in st.session_state:
         'current_question': None,
         'current_options': None,
         'current_answer': None,
-        'initialized': False
+        'initialized': False,
+        'remaining_words': list(words.items()),
+        'round': 1,
+        'quiz_completed': False
     }
 
 # 앱이 로드될 때마다 초기화
@@ -62,7 +74,10 @@ if not st.session_state.vocabulary_quiz_state['initialized']:
         'current_question': None,
         'current_options': None,
         'current_answer': None,
-        'initialized': True
+        'initialized': True,
+        'remaining_words': list(words.items()),
+        'round': 1,
+        'quiz_completed': False
     }
 
 # 메인 화면 구성
@@ -108,12 +123,14 @@ else:
 
 # 새 문제 만들기 버튼
 if st.button("새 문제 만들기"):
-    question, options, correct_answer = generate_question()
-    st.session_state.vocabulary_quiz_state['current_question'] = question
-    st.session_state.vocabulary_quiz_state['current_options'] = options
-    st.session_state.vocabulary_quiz_state['current_answer'] = correct_answer
-    st.session_state.vocabulary_quiz_state['question_generated'] = True
-    st.rerun()
+    if not st.session_state.vocabulary_quiz_state['quiz_completed']:
+        question, options, correct_answer = generate_question()
+        if question:
+            st.session_state.vocabulary_quiz_state['current_question'] = question
+            st.session_state.vocabulary_quiz_state['current_options'] = options
+            st.session_state.vocabulary_quiz_state['current_answer'] = correct_answer
+            st.session_state.vocabulary_quiz_state['question_generated'] = True
+            st.rerun()
 
 # 사이드바에 정답 카운트 표시
 st.sidebar.header("단어퀴즈 점수")
