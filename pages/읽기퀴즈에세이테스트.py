@@ -135,26 +135,23 @@ def generate_essay_question():
         korean_options = [korean_activities[opt] for opt in options]
         correct_answer = korean_activities[correct_answer]
     elif "기분이 어땠나요?" in question:
-        feelings = ["즐거웠다", "흥미로웠다", "신났다", "재미있었다"]
+        feelings = ["즐거웠다", "지루했다", "흥분됐다", "피곤했다"]
         correct_answer = random.choice(feelings)
-        wrong_answers = random.sample([f for f in feelings if f != correct_answer], 3)
+        wrong_answers = [f for f in feelings if f != correct_answer]
         korean_options = [correct_answer] + wrong_answers
-    else:  # "경험에 대해 어떤 것을 알 수 있나요?"
-        correct_answer = additional_info[0]
-        wrong_answers = random.sample([a for a in additional_info if a != correct_answer] + ["It was boring", "It was a waste of time", "It was too difficult"], 3)
-        
-        # 영어 문장을 한국어로 번역
-        korean_translations = {
-            "It was boring": "지루했다",
-            "It was a waste of time": "시간 낭비였다",
-            "It was too difficult": "너무 어려웠다"
-        }
-        
-        def translate_to_korean(sentence):
-            return korean_translations.get(sentence, generate_gpt_translation(sentence))
-
-        korean_options = [translate_to_korean(answer) for answer in [correct_answer] + wrong_answers]
-        correct_answer = korean_options[0]
+    elif "경험에 대해 어떤 것을 알 수 있나요?" in question:
+        options = [
+            "좋은 거래를 찾았다",
+            "새로운 사람들을 만났다",
+            "시간을 낭비했다",
+            "새로운 기술을 배웠다"
+        ]
+        correct_answer = options[0]  # 첫 번째 옵션을 정답으로 설정
+        korean_options = options
+    else:  # 활동에 대한 질문
+        correct_answer = korean_activities[activity]
+        wrong_activities = random.sample([a for a in korean_activities.values() if a != correct_answer], 3)
+        korean_options = [correct_answer] + wrong_activities
 
     random.shuffle(korean_options)
 
@@ -394,7 +391,7 @@ def main():
         else:
             dialogue, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "conversation")
             
-            st.markdown("### ��문")
+            st.markdown("### 문")
             st.write(question)
             
             st.divider()
