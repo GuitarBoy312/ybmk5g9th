@@ -56,16 +56,16 @@ def generate_essay_question():
     
     activity, dialogue = random.choice(list(activities.items()))
     
-    question_format = f"{name}는 {activity}에서 무엇을 했나요?"
+    question_format = f"{name}는 어제 무엇을 했나요?"
     
     korean_options = [
         "친구들과 게임을 즐겼다",
-        "흥미진진한 액션 영화였다",
-        "작은 장난감 자동차 모델이었다",
+        "흥미진진한 액션 영화를 봤다",
+        "작은 장난감 자동차 모델을 만들었다",
         "호수에서 물고기 세 마리를 잡았다",
         "새 옷을 샀다",
         "고대 역사에 대해 배웠다",
-        "우리 팀이 경기에서 이겼다",
+        "축구 경기에서 이겼다",
         "홈런을 쳤다",
         "조선 시대에 대한 책을 읽었다",
         "실제 로켓을 보았다"
@@ -293,7 +293,7 @@ def main():
     # 난이도 선택 버튼과 새 문제 만들기 버튼을 맨 아래로 이동
     difficulty = st.radio("난이도를 선택하세요:", ("기본", "심화"))
     
-    if st.button("새 문제 만들기"):
+    if st.button("새 ��제 만들기"):
         with st.spinner("새로운 문제를 생성 중입니다..."):
             if difficulty == "기본":
                 st.session_state.reading_quiz_current_question = generate_conversation_question()
