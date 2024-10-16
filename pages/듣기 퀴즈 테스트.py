@@ -7,8 +7,11 @@ import re
 # OpenAI 클라이언트 초기화 (TTS용)
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
-# 캐릭터 이름 목록
-characters = ["Marie", "Yena", "Emma", "Linh", "Juwon", "Dave", "Chanho"]
+# 캐릭터 이름 목록과 음성 매핑
+characters = {
+    "Marie": "nova", "Yena": "shimmer", "Emma": "alloy", "Linh": "nova",
+    "Juwon": "echo", "Dave": "onyx", "Chanho": "fable"
+}
 
 # 활동 목록
 activities = [
@@ -52,7 +55,7 @@ def update_sidebar():
 update_sidebar()
 
 def generate_question():
-    speaker_a, speaker_b = random.sample(characters, 2)
+    speaker_a, speaker_b = random.sample(list(characters.keys()), 2)
     
     correct_activity = random.choice(activities)
     wrong_activities = random.sample([a for a in activities if a != correct_activity], 3)
@@ -70,14 +73,16 @@ def generate_question():
         "question": question,
         "dialogue": dialogue,
         "options": options,
-        "correct_answer": correct_answer
+        "correct_answer": correct_answer,
+        "speaker_a": speaker_a,
+        "speaker_b": speaker_b
     }
 
-def text_to_speech(text):
+def text_to_speech(text, voice):
     try:
         response = client.audio.speech.create(
             model="tts-1",
-            voice="nova",
+            voice=voice,
             input=text
         )
         
@@ -90,10 +95,22 @@ def text_to_speech(text):
         st.error(f"음성 생성 중 오류가 발생했습니다: {str(e)}")
         return ""
 
+def generate_dialogue_audio(dialogue, speaker_a, speaker_b):
+    lines = dialogue.split('\n')
+    audio_tags = []
+    
+    for line in lines:
+        speaker, text = line.split(': ', 1)
+        voice = characters[speaker]
+        audio_tag = text_to_speech(text, voice)
+        audio_tags.append(audio_tag)
+    
+    return "".join(audio_tags)
+
 # Streamlit UI
 
 st.header("✨인공지능 영어듣기 퀴즈 선생님 퀴즐링🕵️‍♀️")
-st.subheader("어제 한 ��에 대해 묻고 답하기 영어듣기 퀴즈🚵‍♂️")
+st.subheader("어제 한 에 대해 묻고 답하기 영어듣기 퀴즈🚵‍♂️")
 st.divider()
 
 with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 👆✅", expanded=False):
@@ -154,7 +171,7 @@ if st.button("새 문제 만들기"):
         st.session_state.correct_answer = qa_set["correct_answer"]
         st.session_state.listening_quiz_current_question = (qa_set["question"], qa_set["options"], qa_set["correct_answer"])
         
-        st.session_state.audio_tags = text_to_speech(qa_set["dialogue"])
+        st.session_state.audio_tags = generate_dialogue_audio(qa_set["dialogue"], qa_set["speaker_a"], qa_set["speaker_b"])
         
         update_sidebar()
         st.rerun()
