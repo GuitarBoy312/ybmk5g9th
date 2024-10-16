@@ -293,7 +293,7 @@ def main():
     # 난이도 선택 버튼과 새 문제 만들기 버튼을 맨 아래로 이동
     difficulty = st.radio("난이도를 선택하세요:", ("기본", "심화"))
     
-    if st.button("새 ��제 만들기"):
+    if st.button("새 문제 만들기"):
         with st.spinner("새로운 문제를 생성 중입니다..."):
             if difficulty == "기본":
                 st.session_state.reading_quiz_current_question = generate_conversation_question()
