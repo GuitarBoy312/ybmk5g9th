@@ -39,61 +39,85 @@ def update_sidebar():
 update_sidebar()
 
 def generate_essay_question():
-    names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
-    name = random.choice(names)
+    name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
+    question_type = random.choice(["what_did", "what_did_where"])
     
-    question_types = [
-        ("장소", "에서 무엇을 했나요?"),
-        ("활동", "을/를 하면서 무엇을 했나요?")
-    ]
-    question_type, question_ending = random.choice(question_types)
-
-    activities = {
-        "장소": [
-            ("학교", "공부를 했다", "새로운 수학 개념을 배웠다"),
-            ("공원", "산책을 했다", "아름다운 경치를 즐겼다"),
-            ("도서관", "책을 읽었다", "흥미로운 과학책을 발견했다"),
-            ("영화관", "영화를 봤다", "재미있는 코미디였다"),
-            ("수영장", "수영을 했다", "자유형 기술을 향상시켰다"),
-            ("동물원", "동물들을 구경했다", "코끼리가 가장 좋았다"),
-            ("우주 센터", "우주선을 봤다", "우주 탐험에 대해 배웠다")
-        ],
-        "활동": [
-            ("배드민턴을 치면서", "게임을 즐겼다", "친구들과 함께 재미있게 놀았다"),
-            ("영화를 보면서", "팝콘을 먹었다", "카라멜 팝콘이 맛있었다"),
-            ("자동차를 만들면서", "집중했다", "작은 장난감 자동차 모델을 완성했다"),
-            ("낚시를 하면서", "기다렸다", "호수에서 물고기 세 마리를 잡았다"),
-            ("쇼핑을 하면서", "옷을 골랐다", "새 옷을 샀다"),
-            ("축구를 하면서", "골을 넣었다", "우리 팀이 경기에서 이겼다"),
-            ("야구를 하면서", "공을 쳤다", "홈런을 쳤다")
+    if question_type == "what_did":
+        question = "What did you do yesterday?"
+        activities = [
+            ("I played badminton.", "I enjoyed the game with my friends."),
+            ("I watched a movie.", "It was a thrilling action film."),
+            ("I made a car.", "It was a small toy car model."),
+            ("I went fishing.", "I caught three fish at the lake."),
+            ("I went shopping.", "I bought some new clothes."),
+            ("I went to the museum.", "I learned about ancient history."),
+            ("I played soccer.", "Our team won the match."),
+            ("I played baseball.", "I hit a home run."),
+            ("I learned about Korean history.", "I read a book about the Joseon Dynasty."),
+            ("I went to the space center.", "I saw real rockets there.")
         ]
-    }
-
-    activity_set = random.choice(activities[question_type])
-    if question_type == "장소":
-        location, action1, action2 = activity_set
-        question = f"{name}은 {location}{question_ending}"
-        dialogue = f"A: What did you do at the {location}, {name}?\nB: I {action1}. I {action2}."
+        answer1, answer2 = random.choice(activities)
+        question_format = f"{name}은 어제 무엇을 했나요?"
     else:
-        action, action1, action2 = activity_set
-        question = f"{name}은 {action}{question_ending}"
-        dialogue = f"A: What did you do while {action}, {name}?\nB: I {action1}. I {action2}."
+        locations = ["학교", "공원", "도서관", "영화관", "수영장", "동물원", "우주 센터"]
+        location = random.choice(locations)
+        activities = {
+            "학교": [("I studied hard.", "I learned new math concepts."),
+                     ("I played with my friends.", "We had fun during recess."),
+                     ("I read many books.", "I finished a novel in the library.")],
+            "공원": [("I took a walk.", "I enjoyed the beautiful scenery."),
+                     ("I rode a bicycle.", "I cycled around the lake."),
+                     ("I had a picnic.", "I ate sandwiches and fruits.")],
+            "도서관": [("I read several books.", "I found an interesting science book."),
+                      ("I did my homework.", "I finished my math assignment."),
+                      ("I rested quietly.", "I took a short nap in a cozy corner.")],
+            "영화관": [("I watched a movie.", "It was a funny comedy."),
+                      ("I ate popcorn.", "The caramel popcorn was delicious."),
+                      ("I spent time with friends.", "We discussed the movie afterwards.")],
+            "수영장": [("I swam laps.", "I improved my freestyle technique."),
+                      ("I played water games.", "We had a splashing contest."),
+                      ("I sunbathed.", "I got a nice tan.")],
+            "동물원": [("I saw many animals.", "The elephants were my favorite."),
+                      ("I ate ice cream.", "It was a refreshing treat on a hot day."),
+                      ("I took lots of photos.", "I captured a lion roaring.")],
+            "우주 센터": [("I saw real rockets.", "I learned about space exploration."),
+                        ("I tried a space simulator.", "It felt like being an astronaut."),
+                        ("I watched a planetarium show.", "I learned about different galaxies.")]
+        }
+        answer1, answer2 = random.choice(activities[location])
+        question = f"What did you do at the {location}?"
+        question_format = f"{name}은 {location}에서 무엇을 했나요?"
 
-    correct_answer = action2
-    wrong_answers = [item[2] for item in activities[question_type] if item[2] != action2]
-    options = random.sample(wrong_answers, 3) + [correct_answer]
-    random.shuffle(options)
-
-    return f"""
-질문: {question}
-대화: {dialogue}
-선택지:
-1. {options[0]}
-2. {options[1]}
-3. {options[2]}
-4. {options[3]}
-정답: {options.index(correct_answer) + 1}
-"""
+    key_expression = f'''
+    A: {question}, {name}
+    B: {answer1} {answer2}
+    '''
+    prompt = f"""
+    {answer1} {answer2}를 이용해 2문장으로 된 짧은 영어 에세이를 만들어 주세요.
+    그 다음, 대화 내용에 관한 간단한 질문을 한국어로 만들어주세요. 
+    마지막으로, 질문에 대한 4개의 선택지를 초등학생이 이해하기 쉬운 한국어로 제공해주세요. 
+    정답은 선택지 중 하나여야 하며, 두 번째 문장의 내용을 반영해야 합니다.
+    출력 형식:
+    질문: {question_format}
+    대화: (영어 대화)
+    선택지:
+    1. (선택지 1)
+    2. (선택지 2)
+    3. (선택지 3)
+    4. (선택지 4)
+    정답: (정답 번호)
+    """
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content" : "너는 EFL 환경의 초등학교 영어교사야. 초등학생에 맞는 쉬운 한국어와 영어를 사용해."},
+            {"role": "user", "content": prompt}]
+    )
+    
+    # 응답 내용 로깅
+    print("GPT Response:", response.choices[0].message.content)
+    
+    return response.choices[0].message.content
 
 def generate_conversation_question():
     names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
