@@ -42,6 +42,10 @@ update_sidebar()
 if 'question_answered' not in st.session_state:
     st.session_state.question_answered = False
 
+# 세션 상태에 이전 선택을 저장하는 변수 추가
+if 'previous_selection' not in st.session_state:
+    st.session_state.previous_selection = None
+
 def generate_essay_question():
     name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
     
@@ -266,6 +270,59 @@ def get_explanation_dialogue(question, dialogue, correct_answer, selected_option
     
     return response.choices[0].message.content.strip()
 
+def display_question(question_type):
+    if question_type == "essay":
+        passage, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "essay")
+    else:
+        dialogue, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "conversation")
+    
+    st.subheader("질문")
+    st.write(question)
+
+    if question_type == "essay":
+        st.divider()
+        st.write(passage)
+        st.divider()
+    else:
+        st.divider()
+        st.text(dialogue)
+        st.divider()
+
+    st.subheader("다음 중 알맞은 답을 골라보세요.")
+    selected_option = st.radio("", options, index=None, key=f"{question_type}_options")
+    
+    if st.button("정답 확인"):
+        if selected_option:
+            if st.session_state.previous_selection and st.session_state.previous_selection != selected_option:
+                st.warning("이미 답변을 제출했습니다. 새 문제를 만들어주세요.")
+                return
+
+            st.session_state.reading_quiz_total_questions += 1
+            st.markdown(f"""
+            <div style='background-color: #E6F3FF; padding: 10px; border-radius: 5px; margin-top: 10px;'>
+            선택한 답: {selected_option}
+            </div>
+            """, unsafe_allow_html=True)
+
+            is_correct = (question_type == "essay" and int(selected_option.split('.')[0].strip()) == correct_answer) or \
+                         (question_type == "conversation" and selected_option.split('.')[0].strip() == correct_answer)
+            
+            if is_correct:
+                st.success("정답입니다!")
+                st.session_state.reading_quiz_correct_answers += 1
+            else:
+                st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
+                if question_type == "essay":
+                    explanation = get_explanation_essay(question, passage, correct_answer, selected_option)
+                else:
+                    explanation = get_explanation_dialogue(question, dialogue, correct_answer, selected_option)
+                st.write(explanation)
+            
+            update_sidebar()
+            st.session_state.previous_selection = selected_option
+        else:
+            st.warning("선택지를 선택하고 정답 확인 버튼을 눌러주세요.")
+
 def main():
     st.header("✨인공지능 영어 퀴즈 선생님 퀴즐링🕵️‍♀️")
     st.subheader("어제 한 일에 대해 묻고 답하기 영어읽기 퀴즈🚵‍♂️")
@@ -288,9 +345,9 @@ def main():
 
     if st.session_state.reading_quiz_current_question:
         if st.session_state.reading_quiz_current_question_type == "essay":
-            display_essay_question()
+            display_question("essay")
         else:
-            display_conversation_question()
+            display_question("conversation")
 
     st.divider()
 
@@ -305,87 +362,8 @@ def main():
             else:
                 st.session_state.reading_quiz_current_question = generate_essay_question()
                 st.session_state.reading_quiz_current_question_type = "essay"
-            st.session_state.question_answered = False
+            st.session_state.previous_selection = None
         st.rerun()
-
-def display_essay_question():
-    passage, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "essay")
-    
-    st.subheader("질문")
-    st.write(question)
-
-    st.divider()
-    st.write(passage)
-    st.divider()
-
-    st.subheader("다음 중 알맞은 답을 골라보세요.")
-    selected_option = st.radio("", options, index=None, key="essay_options", disabled=st.session_state.question_answered)
-    st.session_state.selected_option = selected_option
-
-    if st.button("정답 확인", disabled=st.session_state.question_answered):
-        st.session_state.reading_quiz_total_questions += 1
-        if st.session_state.selected_option:
-            st.markdown(f"""
-            <div style='background-color: #E6F3FF; padding: 10px; border-radius: 5px; margin-top: 10px;'>
-            선택한 답: {st.session_state.selected_option}
-            </div>
-            """, unsafe_allow_html=True)
-
-            selected_number = int(st.session_state.selected_option.split('.')[0].strip())
-            is_correct = selected_number == correct_answer
-            
-            if is_correct:
-                st.success("정답입니다!")
-                st.session_state.reading_quiz_correct_answers += 1
-            else:
-                st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
-                explanation = get_explanation_essay(question, passage, correct_answer, st.session_state.selected_option)
-                st.write(explanation)
-            
-            update_sidebar()
-            st.session_state.question_answered = True
-            st.rerun()
-        else:
-            st.warning("선택지를 선택하고 정답 확인 버튼을 눌러주세요.")
-
-def display_conversation_question():
-    dialogue, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "conversation")
-    
-    st.markdown("### 질문")
-    st.write(question)
-    
-    st.divider()
-    st.text(dialogue)
-    st.divider() 
-    st.subheader("다음 중 알맞은 답을 골라보세요.")
-    selected_option = st.radio("", options, index=None, key="conversation_options", disabled=st.session_state.question_answered)
-    st.session_state.selected_option = selected_option
-
-    if st.button("정답 확인", disabled=st.session_state.question_answered):
-        st.session_state.reading_quiz_total_questions += 1
-        if st.session_state.selected_option:
-            st.markdown(f"""
-            <div style='background-color: #E6F3FF; padding: 10px; border-radius: 5px; margin-top: 10px;'>
-            선택한 답: {st.session_state.selected_option}
-            </div>
-            """, unsafe_allow_html=True)
-
-            selected_letter = st.session_state.selected_option.split('.')[0].strip()
-            is_correct = selected_letter == correct_answer
-            
-            if is_correct:
-                st.success("정답입니다!")
-                st.session_state.reading_quiz_correct_answers += 1
-            else:
-                st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
-                explanation = get_explanation_dialogue(question, dialogue, correct_answer, st.session_state.selected_option)
-                st.write(explanation)
-            
-            update_sidebar()
-            st.session_state.question_answered = True
-            st.rerun()
-        else:
-            st.warning("선택지를 선택하고 정답 확인 버튼을 눌러주세요.")
 
 if __name__ == "__main__":
     main()
