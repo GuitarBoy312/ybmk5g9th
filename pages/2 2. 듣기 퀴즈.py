@@ -36,6 +36,10 @@ if 'listening_quiz_current_question' not in st.session_state:
 if 'audio_tags' not in st.session_state:
     st.session_state.audio_tags = ""
 
+# 활동 목록 순환을 위한 세션 상태 추가
+if 'activity_index' not in st.session_state:
+    st.session_state.activity_index = 0
+
 # 사이드바 컨테이너 생성
 if 'listening_quiz_sidebar_placeholder' not in st.session_state:
     st.session_state.listening_quiz_sidebar_placeholder = st.sidebar.empty()
@@ -58,15 +62,16 @@ def generate_question():
     male_characters = [name for name, gender in characters.items() if gender == "male"]
     female_characters = [name for name, gender in characters.items() if gender == "female"]
     
-    # 랜덤으로 남성과 여성 캐릭터 선택
     speaker_a = random.choice(male_characters)
     speaker_b = random.choice(female_characters)
     
-    # 50% 확률로 순서를 바꿈
     if random.choice([True, False]):
         speaker_a, speaker_b = speaker_b, speaker_a
     
-    correct_activity = random.choice(activities)
+    # 활동 목록에서 순차적으로 정답 선택
+    correct_activity = activities[st.session_state.activity_index]
+    st.session_state.activity_index = (st.session_state.activity_index + 1) % len(activities)
+    
     wrong_activities = random.sample([a for a in activities if a != correct_activity], 3)
     
     all_options = [correct_activity] + wrong_activities
