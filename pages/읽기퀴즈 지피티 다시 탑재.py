@@ -94,16 +94,16 @@ def generate_essay_question():
 def generate_conversation_question():
     names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
     activities = [
-        "배드민턴을 쳤다",
-        "영화를 봤다",
-        "자동차를 만들었다",
-        "낚시를 갔다",
-        "쇼핑을 갔다",
-        "박물관에 갔다",
-        "축구를 했다",
-        "야구를 했다",
-        "한국 역사를 공부했다",
-        "우주 센터에 갔다"
+        "I played badminton",
+        "I watched a movie",
+        "I made a car",
+        "I went fishing",
+        "I went shopping",
+        "I went to the museum",
+        "I played soccer",
+        "I played baseball",
+        "I learned about Korean history",
+        "I went to the space center"
     ]
 
     name = random.choice(names)
@@ -111,7 +111,7 @@ def generate_conversation_question():
 
     dialogue = f"""
 A: {name}, what did you do yesterday?
-B: I {activity}.
+B: {activity}.
 """
 
     question = f"{name}은 어제 무엇을 했나요?"
@@ -124,16 +124,16 @@ B: I {activity}.
 
     # 선택지를 한국어로 변환
     korean_activities = {
-        "배드민턴을 쳤다": "배드민턴을 쳤다",
-        "영화를 봤다": "영화를 봤다",
-        "자동차를 만들었다": "자동차를 만들었다",
-        "낚시를 갔다": "낚시를 갔다",
-        "쇼핑을 갔다": "쇼핑을 갔다",
-        "박물관에 갔다": "박물관에 갔다",
-        "축구를 했다": "축구를 했다",
-        "야구를 했다": "야구를 했다",
-        "한국 역사를 공부했다": "한국 역사를 공부했다",
-        "우주 센터에 갔다": "우주 센터에 갔다"
+        "I played badminton": "배드민턴을 쳤다",
+        "I watched a movie": "영화를 봤다",
+        "I made a car": "자동차를 만들었다",
+        "I went fishing": "낚시를 갔다",
+        "I went shopping": "쇼핑을 갔다",
+        "I went to the museum": "박물관에 갔다",
+        "I played soccer": "축구를 했다",
+        "I played baseball": "야구를 했다",
+        "I learned about Korean history": "한국 역사를 공부했다",
+        "I went to the space center": "우주 센터에 갔다"
     }
 
     korean_options = [korean_activities[opt] for opt in options]
@@ -276,7 +276,7 @@ def main():
     with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 👆✅", expanded=False):
         st.markdown(
     """     
-    1️⃣ [새 문제 만들기] 버튼을 눌��� 문제 만들기.<br>
+    1️⃣ [새 문제 만들기] 버튼을 눌 문제 만들기.<br>
     2️⃣ 질문과 대화를 읽어보기<br> 
     3️⃣ 정답을 선택하고 [정답 확인] 버튼 누르기.<br>
     4️⃣ 정답 확인하기.<br>
