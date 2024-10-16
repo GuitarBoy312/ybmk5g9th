@@ -2,16 +2,29 @@ import streamlit as st
 from openai import OpenAI
 import random
 import base64
-import re
+import io
 
-# OpenAI 클라이언트 초기화
+# OpenAI 클라이언트 초기화 (TTS용)
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
-# 캐릭터와 성별 정의
+# 캐릭터 이름 목록과 성별
 characters = {
     "Marie": "female", "Yena": "female", "Emma": "female", "Linh": "female",
     "Juwon": "male", "Dave": "male", "Chanho": "male"
 }
+
+# 활동 목록
+activities = [
+    ("배드민턴을 쳤다.", "played badminton. 🏸"),
+    ("영화를 봤다.", "watched a movie. 🎬"),
+    ("쇼핑을 갔다.", "went shopping. 🛍️"),
+    ("박물관에 갔다.", "went to the museum. 🏛️"),
+    ("축구를 했다.", "played soccer. ⚽"),
+    ("낚시를 갔다.", "went fishing. 🎣"),
+    ("역사를 공부했다.", "studied history. 📚"),
+    ("우주 센터에 갔다.", "went to the space center. 🚀"),
+    ("자동차를 만들었다.", "made a car. 🚗")
+]
 
 # 세션 상태 초기화
 if 'listening_quiz_total_questions' not in st.session_state:
@@ -20,6 +33,8 @@ if 'listening_quiz_correct_answers' not in st.session_state:
     st.session_state.listening_quiz_correct_answers = 0
 if 'listening_quiz_current_question' not in st.session_state:
     st.session_state.listening_quiz_current_question = None
+if 'audio_tags' not in st.session_state:
+    st.session_state.audio_tags = ""
 
 # 사이드바 컨테이너 생성
 if 'listening_quiz_sidebar_placeholder' not in st.session_state:
@@ -40,145 +55,78 @@ def update_sidebar():
 update_sidebar()
 
 def generate_question():
-    questions = [
-        "What did you do yesterday, {name}?"
-    ]
+    male_characters = [name for name, gender in characters.items() if gender == "male"]
+    female_characters = [name for name, gender in characters.items() if gender == "female"]
     
-    answers = [
-        "I played badminton. 🏸",
-        "I watched a movie. 🎬",
-        "I made a car. 🚗",
-        "I went fishing. 🎣",
-        "I went shopping. 🛍️",
-        "I went to the museum. 🏛️",
-        "I played soccer. ⚽",
-        "I played baseball. ⚾",
-        "I learned about Korean history. 📚",
-        "I went to the space center. 🚀"
-    ]
+    # 랜덤으로 남성과 여성 캐릭터 선택
+    speaker_a = random.choice(male_characters)
+    speaker_b = random.choice(female_characters)
     
-    korean_questions = [
-        "{name}은(는) 어제 무엇을 했나요?"
-    ]
-    
-    selected_question = random.choice(questions)
-    selected_answer = random.choice(answers)
-    selected_korean_question = random.choice(korean_questions)
-    
-    # 성별이 다른 두 화자 선택
-    male_speakers = [name for name, gender in characters.items() if gender == "male"]
-    female_speakers = [name for name, gender in characters.items() if gender == "female"]
-    speaker_a = random.choice(male_speakers)
-    speaker_b = random.choice(female_speakers)
-    
-    # 무작위로 순서 결정
+    # 50% 확률로 순서를 바꿈
     if random.choice([True, False]):
         speaker_a, speaker_b = speaker_b, speaker_a
-
-    formatted_question = selected_question.format(name=speaker_b)
     
-    key_expression = f"""
-{speaker_a}: {formatted_question}
-{speaker_b}: {selected_answer}
-"""
-    prompt = f"""{key_expression}을 생성해주세요. 
-    그 후 대화 내용에 관한 객관식 질문을 한국어로 만들어주세요.  
-    조건: 문제의 정답은 1개입니다.  
-    영어 대화는 A와 B가 각각 1번씩 말하고 끝납니다.
-    A는 다음과 같이 한문장을 말하세요.
-    B는 다음과 같이 한문장을 말하세요.
-    형식:
-    [영어 대화]
-    A: {speaker_a}: {formatted_question}
-    B: {speaker_b}: {selected_answer}
+    correct_activity = random.choice(activities)
+    wrong_activities = random.sample([a for a in activities if a != correct_activity], 3)
+    
+    all_options = [correct_activity] + wrong_activities
+    random.shuffle(all_options)
+    
+    options = [f"{chr(65 + i)}. {option[0]}" for i, option in enumerate(all_options)]
+    correct_answer = next(opt for opt in options if correct_activity[0] in opt)
+    
+    dialogue = f"{speaker_a}: What did you do yesterday, {speaker_b}?\n{speaker_b}: I {correct_activity[1]}"
+    question = f"{speaker_b}는 어제 무엇을 했나요?"
+    
+    return {
+        "question": question,
+        "dialogue": dialogue,
+        "options": options,
+        "correct_answer": correct_answer,
+        "speaker_a": speaker_a,
+        "speaker_b": speaker_b
+    }
 
-
-    [한국어 질문]
-    조건: {selected_korean_question.format(name=speaker_b)}을 만들어야 합니다.
-    (한국어로 된 질문) 이 때, 선택지는 한국어로 제공됩니다.
-    A. (선택지)
-    B. (선택지)
-    C. (선택지)
-    D. (선택지)
-    정답: (정답 선택지)
-    """
-
+def text_to_speech(text, gender):
+    voice = "echo" if gender == "male" else "alloy"
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}]
+        response = client.audio.speech.create(
+            model="tts-1",
+            voice=voice,
+            input=text
         )
-        return response.choices[0].message.content
+        return response.content
     except Exception as e:
-        st.error(f"오류가 발생했습니다. 새문제 만들기 버튼을 다시 눌러주세요.: {str(e)}")
+        st.error(f"음성 생성 중 오류가 발생했습니다: {str(e)}")
         return None
 
-def split_dialogue(text):
-    lines = text.strip().split('\n')
-    speakers = {}
+def generate_dialogue_audio(dialogue, speaker_a, speaker_b):
+    lines = dialogue.split('\n')
+    audio_contents = []
+    
     for line in lines:
-        match = re.match(r'([A-Z]):\s*(.*)', line)
-        if match:
-            speaker, content = match.groups()
-            if speaker not in speakers:
-                speakers[speaker] = []
-            speakers[speaker].append(content)
-    return speakers
-
-def text_to_speech(text, speaker):
-    voice = "nova" if characters[speaker] == "female" else "echo"
-    response = client.audio.speech.create(
-        model="tts-1",
-        voice=voice,
-        input=text
-    )
+        speaker, text = line.split(': ', 1)
+        gender = characters[speaker]
+        audio_content = text_to_speech(text, gender)
+        if audio_content:
+            audio_contents.append(audio_content)
     
-    audio_bytes = response.content
-    audio_base64 = base64.b64encode(audio_bytes).decode()
-    audio_tag = f'<audio controls><source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3"></audio>'
-    
-    return audio_tag
+    return audio_contents
 
-def generate_dialogue_audio(dialogue):
-    speakers = split_dialogue(dialogue)
+def create_audio_players(audio_contents):
     audio_tags = []
-    
-    for speaker, lines in speakers.items():
-        text = " ".join(lines)
-        speaker_name = re.search(r'([A-Za-z]+):', lines[0]).group(1)  # 대화에서 화자 이름 추출
-        audio_tag = text_to_speech(text, speaker_name)
+    for i, content in enumerate(audio_contents):
+        audio_base64 = base64.b64encode(content).decode()
+        audio_tag = f'<audio controls><source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3"></audio>'
         audio_tags.append(audio_tag)
-    
     return "".join(audio_tags)
-
-def generate_explanation(question, correct_answer, user_answer, dialogue):
-    prompt = f"""
-    다음 영어 대화와 관련된 질문에 대해 학생이 오답을 선택했습니다. 
-    대화: {dialogue}
-    질문: {question}
-    정답: {correct_answer}
-    학생의 답변: {user_answer}
-    
-    이 학생에게 왜 그들의 답변이 틀렸는지, 그리고 정답이 무엇인지 설명해주세요. 
-    설명은 친절하고 격려하는 톤으로 작성해주세요. 
-    대화의 내용을 참조하여 구체적으로 설명해주세요.
-    """
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
-
-    return response.choices[0].message.content
 
 # Streamlit UI
 
-# 메인 화면 구성
 st.header("✨인공지능 영어듣기 퀴즈 선생님 퀴즐링🕵️‍♀️")
-st.subheader("어제 한 일에 대해 묻고 답하기 영어듣기 퀴즈🚵‍♂️")
+st.subheader("어제 한 에 대해 묻고 답하기 영어듣기 퀴즈🚵‍♂️")
 st.divider()
 
-#확장 설명
 with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 👆✅", expanded=False):
     st.markdown(
     """     
@@ -189,7 +137,7 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     4️⃣ 정답과 대화 스크립트 확인하기.<br>
     <br>
     🙏 퀴즐링은 완벽하지 않을 수 있어요.<br> 
-    🙏 그럴 때에는 [새 문제 만들기] 버튼을 눌러주세요.
+    🙏 그럴 때에는 [새 문제 만들기] 버튼을 다시 눌러주세요.
     """
     ,  unsafe_allow_html=True)
 
@@ -229,43 +177,16 @@ if st.session_state.listening_quiz_current_question is not None:
 if st.button("새 문제 만들기"):
     try:
         with st.spinner("새로운 문제를 생성 중입니다..."):
-            full_content = generate_question()
+            qa_set = generate_question()
+            
+        st.session_state.question = qa_set["question"]
+        st.session_state.dialogue = qa_set["dialogue"]
+        st.session_state.options = qa_set["options"]
+        st.session_state.correct_answer = qa_set["correct_answer"]
+        st.session_state.listening_quiz_current_question = (qa_set["question"], qa_set["options"], qa_set["correct_answer"])
         
-        if full_content is None:
-            st.error("오류가 발생했습니다. 새문제 만들기 버튼을 다시 눌러주세요.")
-            st.stop()
-        
-        if "[한국어 질문]" not in full_content:
-            st.error("오류가 발생했습니다. 새문제 만들기 버튼을 다시 눌러주세요.")
-            st.stop()
-        
-        dialogue, question_part = full_content.split("[한국어 질문]")
-        
-        question_lines = question_part.strip().split("\n")
-        question = question_lines[0].replace("질문:", "").strip() if question_lines else ""
-        options = [line.strip() for line in question_lines[1:5] if line.strip()]
-        correct_answer = ""
-        
-        for line in question_lines:
-            if line.startswith("정답:"):
-                correct_answer = line.replace("정답:", "").strip()
-                break
-        
-        if not question or not options or not correct_answer:
-            st.error("오류가 발생했습니다. 새문제 만들기 버튼을 다시 눌러주세요.")
-            st.stop()
-        
-        if correct_answer not in options:
-            st.error("오류가 발생했습니다. 새문제 만들기 버튼을 다시 눌러주세요.")
-            st.stop()
-        
-        st.session_state.question = question
-        st.session_state.dialogue = dialogue.strip()
-        st.session_state.options = options
-        st.session_state.correct_answer = correct_answer
-        st.session_state.listening_quiz_current_question = (question, options, correct_answer)
-        
-        st.session_state.audio_tags = generate_dialogue_audio(st.session_state.dialogue)
+        audio_contents = generate_dialogue_audio(qa_set["dialogue"], qa_set["speaker_a"], qa_set["speaker_b"])
+        st.session_state.audio_tags = create_audio_players(audio_contents)
         
         update_sidebar()
         st.rerun()
