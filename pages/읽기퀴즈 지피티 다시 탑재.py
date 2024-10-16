@@ -40,82 +40,57 @@ update_sidebar()
 
 def generate_essay_question():
     name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
-    question_type = random.choice(["what_did", "what_did_where"])
-    
-    locations = ["학교", "공원", "도서관", "영화관", "수영장", "동물원", "우주 센터"]
-    location = random.choice(locations)
     
     activities = {
-        "학교": [("I studied hard.", "I learned new math concepts."),
-                 ("I played with my friends.", "We had fun during recess."),
-                 ("I read many books.", "I finished a novel in the library.")],
-        "공원": [("I took a walk.", "I enjoyed the beautiful scenery."),
-                 ("I rode a bicycle.", "I cycled around the lake."),
-                 ("I had a picnic.", "I ate sandwiches and fruits.")],
-        "도서관": [("I read several books.", "I found an interesting science book."),
-                  ("I did my homework.", "I finished my math assignment."),
-                  ("I rested quietly.", "I took a short nap in a cozy corner.")],
-        "영화관": [("I watched a movie.", "It was a funny comedy."),
-                  ("I ate popcorn.", "The caramel popcorn was delicious."),
-                  ("I spent time with friends.", "We discussed the movie afterwards.")],
-        "수영장": [("I swam laps.", "I improved my freestyle technique."),
-                  ("I played water games.", "We had a splashing contest."),
-                  ("I sunbathed.", "I got a nice tan.")],
-        "동물원": [("I saw many animals.", "The elephants were my favorite."),
-                  ("I ate ice cream.", "It was a refreshing treat on a hot day."),
-                  ("I took lots of photos.", "I captured a lion roaring.")],
-        "우주 센터": [("I saw real rockets.", "I learned about space exploration."),
-                    ("I tried a space simulator.", "It felt like being an astronaut."),
-                    ("I watched a planetarium show.", "I learned about different galaxies.")]
+        "played badminton": "I enjoyed the game with my friends.",
+        "watched a movie": "It was a thrilling action film.",
+        "made a car": "It was a small toy car model.",
+        "went fishing": "I caught three fish at the lake.",
+        "went shopping": "I bought some new clothes.",
+        "went to the museum": "I learned about ancient history.",
+        "played soccer": "Our team won the match.",
+        "played baseball": "I hit a home run.",
+        "learned about Korean history": "I read a book about the Joseon Dynasty.",
+        "went to the space center": "I saw real rockets there."
     }
     
-    answer1, answer2 = random.choice(activities[location])
+    activity, second_sentence = random.choice(list(activities.items()))
     
-    if question_type == "what_did":
-        question_format = f"{name}은 {answer1[2:-1]}하면서 무엇을 했나요?"
-    else:
-        question_format = f"{name}은 {location}에서 무엇을 했나요?"
-
-    dialogue = f"{answer1} {answer2}"
-    
-    correct_answer = answer2[:-1]  # 마지막 마침표 제거
+    question_format = f"{name}은 {activity}하면서 무엇을 했나요?"
+    dialogue = f"I {activity}. {second_sentence}"
     
     # 선택지를 한국어로 번역
     korean_options = [
-        "새로운 수학 개념을 배웠다",
-        "쉬는 시간에 친구들과 재미있게 놀았다",
-        "도서관에서 소설 한 권을 다 읽었다",
-        "아름다운 경치를 즐겼다",
-        "호수 주변을 자전거로 돌았다",
-        "샌드위치와 과일을 먹었다",
-        "흥미로운 과학책을 발견했다",
-        "수학 숙제를 끝냈다",
-        "아늑한 구석에서 짧은 낮잠을 잤다",
-        "재미있는 코미디였다",
-        "카라멜 팝콘이 맛있었다",
-        "영화에 대해 토론했다",
-        "자유형 기술을 향상시켰다",
-        "물놀이 대회를 했다",
-        "멋진 선탠을 했다",
-        "코끼리가 가장 좋았다",
-        "더운 날에 시원한 간식이었다",
-        "사자가 포효하는 모습을 찍었다",
+        "친구들과 게임을 즐겼다",
+        "흥미진진한 액션 영화였다",
+        "작은 장난감 자동차 모델이었다",
+        "호수에서 물고기 세 마리를 잡았다",
+        "새 옷을 샀다",
+        "고대 역사에 대해 배웠다",
+        "우리 팀이 경기에서 이겼다",
+        "홈런을 쳤다",
+        "조선 시대에 대한 책을 읽었다",
+        "실제 로켓을 보았다",
+        "친구들과 영화에 대해 토론했다",
         "우주 탐험에 대해 배웠다",
         "우주 비행사가 된 것 같은 느낌이었다",
         "다양한 은하계에 대해 배웠다"
     ]
     
-    korean_options = random.sample(korean_options, 4)
+    correct_answer = korean_options[list(activities.keys()).index(activity)]
+    wrong_answers = [opt for opt in korean_options if opt != correct_answer]
+    options = random.sample(wrong_answers, 3) + [correct_answer]
+    random.shuffle(options)
 
     return f"""
 질문: {question_format}
 대화: {dialogue}
 선택지:
-1. {korean_options[0]}
-2. {korean_options[1]}
-3. {korean_options[2]}
-4. {korean_options[3]}
-정답: {random.randint(1, 4)}
+1. {options[0]}
+2. {options[1]}
+3. {options[2]}
+4. {options[3]}
+정답: {options.index(correct_answer) + 1}
 """
 
 def generate_conversation_question():
