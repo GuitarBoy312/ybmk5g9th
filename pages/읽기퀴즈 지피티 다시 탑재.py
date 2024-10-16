@@ -43,15 +43,15 @@ def generate_essay_question():
     
     activities = {
         "배드민턴을 치면서": "I played badminton. I enjoyed the game with my friends.",
-        "영화를 보면서": "I watched a movie. It was a thrilling action film.",
+        "영화를 보러 가서": "I watched a movie. It was a thrilling action film.",
         "자동차를 만들면서": "I made a car. It was a small toy car model.",
-        "낚시를 하면서": "I went fishing. I caught three fish at the lake.",
-        "쇼핑을 하면서": "I went shopping. I bought some new clothes.",
-        "박물관에 가면서": "I went to the museum. I learned about ancient history.",
+        "낚시를 가서": "I went fishing. I caught three fish at the lake.",
+        "쇼핑을 가서": "I went shopping. I bought some new clothes.",
+        "박물관에 가서": "I went to the museum. I learned about ancient history.",
         "축구를 하면서": "I played soccer. Our team won the match.",
         "야구를 하면서": "I played baseball. I hit a home run.",
         "한국 역사를 공부하면서": "I learned about Korean history. I read a book about the Joseon Dynasty.",
-        "우주 센터에 가면서": "I went to the space center. I saw real rockets there."
+        "우주 센터에 가서": "I went to the space center. I saw real rockets there."
     }
     
     activity, dialogue = random.choice(list(activities.items()))
