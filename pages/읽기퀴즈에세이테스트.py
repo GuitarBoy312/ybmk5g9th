@@ -107,9 +107,8 @@ def generate_essay_question():
     question = generate_gpt_question(essay)
 
     # 정답과 오답 생성 로직 수정
-    words = essay.split()
-    correct_answer = random.choice([word for word in words if len(word) > 3 and word.isalpha()])
-    wrong_answers = random.sample([word for word in words if word != correct_answer and len(word) > 3 and word.isalpha()], 3)
+    correct_answer = name
+    wrong_answers = random.sample([n for n in names if n != name], 3)
     options = [correct_answer] + wrong_answers
     random.shuffle(options)
 
