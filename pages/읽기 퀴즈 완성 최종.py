@@ -290,6 +290,9 @@ def display_question(question_type):
 
     st.subheader("다음 중 알맞은 답을 골라보세요.")
     
+    # 난이도 선택을 폼 밖으로 이동
+    difficulty = st.radio("난이도를 선택하세요:", ("기본", "심화"), key="difficulty")
+
     with st.form(key='answer_form'):
         selected_option = st.radio("", options, index=None)
         submit_button = st.form_submit_button(label='정답 확인')
@@ -316,8 +319,11 @@ def display_question(question_type):
                 update_sidebar()
             else:
                 st.warning("답을 선택해주세요.")
-        elif st.session_state.question_answered:
+        elif st.session_state.question_answered and st.session_state.get('previous_difficulty') == difficulty:
             st.warning("이미 답변을 제출했습니다. 새 문제를 만들어주세요.")
+
+    # 현재 난이도를 저장
+    st.session_state.previous_difficulty = difficulty
 
 def main():
     st.header("✨인공지능 영어 퀴즈 선생님 퀴즐링🕵️‍♀️")
@@ -347,10 +353,8 @@ def main():
 
     st.divider()
 
-    # 난이도 선택 버튼��� 새 문제 만들기 버튼을 맨 아래로 이동
-    difficulty = st.radio("난이도를 선택하세요:", ("기본", "심화"), key="difficulty")
-    
-    if st.button("새 문제 만들기") or st.session_state.get('difficulty') != difficulty:
+    # 난이도 선택 버튼과 새 문제 만들기 버튼을 맨 아래로 이동
+    if st.button("새 문제 만들기"):
         with st.spinner("새로운 문제를 생성 중입니다..."):
             if difficulty == "기본":
                 st.session_state.reading_quiz_current_question = generate_conversation_question()
@@ -359,7 +363,6 @@ def main():
                 st.session_state.reading_quiz_current_question = generate_essay_question()
                 st.session_state.reading_quiz_current_question_type = "essay"
             st.session_state.question_answered = False
-            st.session_state.difficulty = difficulty
         st.rerun()
 
 if __name__ == "__main__":
