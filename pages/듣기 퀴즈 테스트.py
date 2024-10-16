@@ -55,7 +55,16 @@ def update_sidebar():
 update_sidebar()
 
 def generate_question():
-    speaker_a, speaker_b = random.sample(list(characters.keys()), 2)
+    male_characters = [name for name, gender in characters.items() if gender == "male"]
+    female_characters = [name for name, gender in characters.items() if gender == "female"]
+    
+    # 랜덤으로 남성과 여성 캐릭터 선택
+    speaker_a = random.choice(male_characters)
+    speaker_b = random.choice(female_characters)
+    
+    # 50% 확률로 순서를 바꿈
+    if random.choice([True, False]):
+        speaker_a, speaker_b = speaker_b, speaker_a
     
     correct_activity = random.choice(activities)
     wrong_activities = random.sample([a for a in activities if a != correct_activity], 3)
