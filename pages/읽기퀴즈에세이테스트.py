@@ -38,145 +38,86 @@ def update_sidebar():
 # 초기 사이드바 설정
 update_sidebar()
 
-def generate_gpt_question(essay):
-    prompt = f"""
-    다음 짧은 영어 에세이를 읽고, 이에 대한 구체적인 한국어 독해 질문을 생성해주세요. 
-    질문은 에세이의 내용을 정확히 이해했는지 확인할 수 있는 것이어야 합니다.
-    질문은 '누가', '어디서', '무엇을', '어떻게' 등의 구체적인 정보를 물어보는 형식이어야 합니다.
-    또한, 질문에 대한 답이 에세이 내용에서 명확히 찾을 수 있어야 합니다.
-    
-    에세이:
-    {essay}
-    
-    질문:
-    """
-    
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "당신은 영어 교육 전문가입니다. 주어진 영어 에세이에 대한 구체적이고 적절한 한국어 독해 질문을 생성해야 합니다."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    
-    return response.choices[0].message.content.strip()
-
-def generate_gpt_additional_info(activity):
-    prompt = f"""
-    다음 활동에 대한 추가 정보를 2개 생성해주세요. 각 정보는 한 문장으로, 영어로 작성해주세요.
-    활동: {activity}
-    
-    예시 형식:
-    1. It was very exciting.
-    2. I learned a lot from this experience.
-    """
-    
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "당신은 영어 교육 전문가입니다. 주어진 활동에 대한 적절한 추가 정보를 영어로 생성해야 합니다."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    
-    additional_info = response.choices[0].message.content.strip().split('\n')
-    return [info.split('. ')[1] for info in additional_info if '. ' in info]
-
 def generate_essay_question():
-    names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
-    activities = [
-        "played badminton",
-        "watched a movie",
-        "made a car",
-        "went fishing",
-        "went shopping",
-        "went to the museum",
-        "played soccer",
-        "played baseball",
-        "learned about Korean history",
-        "went to the space center"
-    ]
-
-    name = random.choice(names)
-    activity = random.choice(activities)
+    name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
+    question_type = random.choice(["what_did", "what_did_where"])
     
-    additional_info = generate_gpt_additional_info(activity)
-    
-    essay = f"""Yesterday, {name} {activity}. {additional_info[0]} {additional_info[1]}"""
-
-    # 다양한 질문 유형 생성
-    question_types = [
-        f"{name}은 어제 무엇을 했나요?",
-        f"{name}이(가) {activity.split()[-1]}에서 무엇을 했나요?",
-        f"{name}이(가) {activity.split()[-1]}에 가서 기분이 어땠나요?",
-        f"{name}이(가) 어제 한 활동은 무엇인가요?",
-        f"어제 {name}의 경험에 대해 어떤 것을 알 수 있나요?"
-    ]
-
-    question = random.choice(question_types)
-
-    # 질문 유형에 따라 정답과 오답 생성
-    if "무엇을 했나요?" in question or "활동은 무엇인가요?" in question:
-        correct_answer = activity
-        wrong_answers = random.sample([a for a in activities if a != activity], 3)
-        options = [activity] + wrong_answers
-        korean_activities = {
-            "played badminton": "배드민턴을 쳤다",
-            "watched a movie": "영화를 봤다",
-            "made a car": "자동차를 만들었다",
-            "went fishing": "낚시를 갔다",
-            "went shopping": "쇼핑을 갔다",
-            "went to the museum": "박물관에 갔다",
-            "played soccer": "축구를 했다",
-            "played baseball": "야구를 했다",
-            "learned about Korean history": "한국 역사를 배웠다",
-            "went to the space center": "우주 센터에 갔다"
-        }
-        korean_options = [korean_activities[opt] for opt in options]
-        correct_answer = korean_activities[correct_answer]
-    elif "기분이 어땠나요?" in question:
-        feelings = ["즐거웠다", "지루했다", "흥분됐다", "피곤했다"]
-        correct_answer = random.choice(feelings)
-        wrong_answers = [f for f in feelings if f != correct_answer]
-        korean_options = [correct_answer] + wrong_answers
-    elif "경험에 대해 어떤 것을 알 수 있나요?" in question:
-        options = [
-            "좋은 거래를 찾았다",
-            "새로운 사람들을 만났다",
-            "시간을 낭비했다",
-            "새로운 기술을 배웠다"
+    if question_type == "what_did":
+        question = "What did you do yesterday?"
+        activities = [
+            ("I played badminton.", "I enjoyed the game with my friends."),
+            ("I watched a movie.", "It was a thrilling action film."),
+            ("I made a car.", "It was a small toy car model."),
+            ("I went fishing.", "I caught three fish at the lake."),
+            ("I went shopping.", "I bought some new clothes."),
+            ("I went to the museum.", "I learned about ancient history."),
+            ("I played soccer.", "Our team won the match."),
+            ("I played baseball.", "I hit a home run."),
+            ("I learned about Korean history.", "I read a book about the Joseon Dynasty."),
+            ("I went to the space center.", "I saw real rockets there.")
         ]
-        correct_answer = options[0]  # 첫 번째 옵션을 정답으로 설정
-        korean_options = options
-    else:  # 활동에 대한 질문
-        correct_answer = korean_activities[activity]
-        wrong_activities = random.sample([a for a in korean_activities.values() if a != correct_answer], 3)
-        korean_options = [correct_answer] + wrong_activities
+        answer1, answer2 = random.choice(activities)
+        question_format = f"{name}은 어제 무엇을 했나요?"
+    else:
+        locations = ["학교", "공원", "도서관", "영화관", "수영장", "동물원", "우주 센터"]
+        location = random.choice(locations)
+        activities = {
+            "학교": [("I studied hard.", "I learned new math concepts."),
+                     ("I played with my friends.", "We had fun during recess."),
+                     ("I read many books.", "I finished a novel in the library.")],
+            "공원": [("I took a walk.", "I enjoyed the beautiful scenery."),
+                     ("I rode a bicycle.", "I cycled around the lake."),
+                     ("I had a picnic.", "I ate sandwiches and fruits.")],
+            "도서관": [("I read several books.", "I found an interesting science book."),
+                      ("I did my homework.", "I finished my math assignment."),
+                      ("I rested quietly.", "I took a short nap in a cozy corner.")],
+            "영화관": [("I watched a movie.", "It was a funny comedy."),
+                      ("I ate popcorn.", "The caramel popcorn was delicious."),
+                      ("I spent time with friends.", "We discussed the movie afterwards.")],
+            "수영장": [("I swam laps.", "I improved my freestyle technique."),
+                      ("I played water games.", "We had a splashing contest."),
+                      ("I sunbathed.", "I got a nice tan.")],
+            "동물원": [("I saw many animals.", "The elephants were my favorite."),
+                      ("I ate ice cream.", "It was a refreshing treat on a hot day."),
+                      ("I took lots of photos.", "I captured a lion roaring.")],
+            "우주 센터": [("I saw real rockets.", "I learned about space exploration."),
+                        ("I tried a space simulator.", "It felt like being an astronaut."),
+                        ("I watched a planetarium show.", "I learned about different galaxies.")]
+        }
+        answer1, answer2 = random.choice(activities[location])
+        question = f"What did you do at the {location}?"
+        question_format = f"{name}은 {location}에서 무엇을 했나요?"
 
-    random.shuffle(korean_options)
-
-    return f"""
-질문: {question}
-대화: {essay}
-1. {korean_options[0]}
-2. {korean_options[1]}
-3. {korean_options[2]}
-4. {korean_options[3]}
-정답: {korean_options.index(correct_answer) + 1}
-"""
-
-def generate_gpt_translation(sentence):
-    prompt = f"다음 영어 문장을 한국어로 번역해주세요: '{sentence}'"
-    
+    key_expression = f'''
+    A: {question}, {name}
+    B: {answer1} {answer2}
+    '''
+    prompt = f"""
+    {answer1} {answer2}를 이용해 2문장으로 된 짧은 영어 에세이를 만들어 주세요.
+    그 다음, 대화 내용에 관한 간단한 질문을 한국어로 만들어주세요. 
+    마지막으로, 질문에 대한 4개의 선택지를 초등학생이 이해하기 쉬운 한국어로 제공해주세요. 
+    정답은 선택지 중 하나여야 하며, 두 번째 문장의 내용을 반영해야 합니다.
+    출력 형식:
+    질문: {question_format}
+    대화: (영어 대화)
+    선택지:
+    1. (선택지 1)
+    2. (선택지 2)
+    3. (선택지 3)
+    4. (선택지 4)
+    정답: (정답 번호)
+    """
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "당신은 전문 번역가입니다. 주어진 영어 문장을 자연스러운 한국어로 번역해야 합니다."},
-            {"role": "user", "content": prompt}
-        ]
+            {"role": "system", "content" : "너는 EFL 환경의 초등학교 영어교사야. 초등학생에 맞는 쉬운 한국어와 영어를 사용해."},
+            {"role": "user", "content": prompt}]
     )
     
-    return response.choices[0].message.content.strip()
+    # 응답 내용 로깅
+    print("GPT Response:", response.choices[0].message.content)
+    
+    return response.choices[0].message.content
 
 def generate_conversation_question():
     names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
@@ -391,7 +332,7 @@ def main():
         else:
             dialogue, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "conversation")
             
-            st.markdown("### 문")
+            st.markdown("### 질문")
             st.write(question)
             
             st.divider()
