@@ -23,16 +23,7 @@ words = {
 }
 
 def generate_question():
-    if not st.session_state.vocabulary_quiz_state['remaining_words']:
-        st.session_state.vocabulary_quiz_state['remaining_words'] = list(words.items())
-        st.session_state.vocabulary_quiz_state['round'] += 1
-        if st.session_state.vocabulary_quiz_state['round'] > 2:
-            st.session_state.vocabulary_quiz_state['quiz_completed'] = True
-            return None, None, None
-
-    word, meaning = random.choice(st.session_state.vocabulary_quiz_state['remaining_words'])
-    st.session_state.vocabulary_quiz_state['remaining_words'].remove((word, meaning))
-    
+    word, meaning = random.choice(list(words.items()))
     is_english_to_korean = random.choice([True, False])
     
     if is_english_to_korean:
@@ -60,9 +51,7 @@ if 'vocabulary_quiz_state' not in st.session_state:
         'current_options': None,
         'current_answer': None,
         'initialized': False,
-        'remaining_words': list(words.items()),
-        'round': 1,
-        'quiz_completed': False
+        'answered': False  # 새로운 상태 추가
     }
 
 # 앱이 로드될 때마다 초기화
@@ -75,14 +64,12 @@ if not st.session_state.vocabulary_quiz_state['initialized']:
         'current_options': None,
         'current_answer': None,
         'initialized': True,
-        'remaining_words': list(words.items()),
-        'round': 1,
-        'quiz_completed': False
+        'answered': False  # 새로운 상태 추가
     }
 
 # 메인 화면 구성
 st.header("✨인공지능 영어단어 퀴즈 선생님 퀴즐링🕵️‍♀️")
-st.subheader("어제 한 일에 대해 묻고 답하기 영어단어 퀴즈🚵‍♂️")
+st.subheader("🦝동물의 생김새와 크기에 대한 영어단어 퀴즈🦩")
 st.divider()
 
 #확장 설명
@@ -107,10 +94,11 @@ if st.session_state.vocabulary_quiz_state['question_generated']:
         selected_option = st.radio("정답을 선택하세요:", st.session_state.vocabulary_quiz_state['current_options'], index=None)
         submit_button = st.form_submit_button(label='정답 확인')
 
-        if submit_button:
+        if submit_button and not st.session_state.vocabulary_quiz_state['answered']:
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
-                st.session_state.vocabulary_quiz_state['total_count'] += 1
+                st.session_state.vocabulary_quiz_state['answered'] = True
+                st.session_state.vocabulary_quiz_state['total_count'] += 1  # 총 문제 수 증가
                 if selected_option.strip() == st.session_state.vocabulary_quiz_state['current_answer'].strip():  
                     st.success("정답입니다!")
                     st.session_state.vocabulary_quiz_state['correct_count'] += 1
@@ -118,19 +106,22 @@ if st.session_state.vocabulary_quiz_state['question_generated']:
                     st.error(f"틀렸습니다. 정답은 {st.session_state.vocabulary_quiz_state['current_answer']}입니다.")
             else:
                 st.warning("답을 선택해주세요.")
+        elif st.session_state.vocabulary_quiz_state['answered']:
+            st.warning("이미 답변을 제출했습니다. 새 문제를 만들어주세요.")
+
 else:
     st.info("아래의 '새 문제 만들기' 버튼을 눌러 퀴즈를 시작하세요.")
 
 # 새 문제 만들기 버튼
 if st.button("새 문제 만들기"):
-    if not st.session_state.vocabulary_quiz_state['quiz_completed']:
-        question, options, correct_answer = generate_question()
-        if question:
-            st.session_state.vocabulary_quiz_state['current_question'] = question
-            st.session_state.vocabulary_quiz_state['current_options'] = options
-            st.session_state.vocabulary_quiz_state['current_answer'] = correct_answer
-            st.session_state.vocabulary_quiz_state['question_generated'] = True
-            st.rerun()
+    question, options, correct_answer = generate_question()
+    st.session_state.vocabulary_quiz_state['current_question'] = question
+    st.session_state.vocabulary_quiz_state['current_options'] = options
+    st.session_state.vocabulary_quiz_state['current_answer'] = correct_answer
+    st.session_state.vocabulary_quiz_state['question_generated'] = True
+    st.session_state.vocabulary_quiz_state['answered'] = False  # 답변 상태 초기화
+    # st.session_state.vocabulary_quiz_state['total_count'] += 1  # 이 줄 제거
+    st.rerun()
 
 # 사이드바에 정답 카운트 표시
 st.sidebar.header("단어퀴즈 점수")
