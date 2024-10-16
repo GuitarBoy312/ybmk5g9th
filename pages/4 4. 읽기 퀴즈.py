@@ -38,101 +38,123 @@ def update_sidebar():
 # 초기 사이드바 설정
 update_sidebar()
 
+# 세션 상태에 문제 답변 여부를 추적하는 변수 추가
+if 'question_answered' not in st.session_state:
+    st.session_state.question_answered = False
+
+# 세션 상태에 이전 선택을 저장하는 변수 추가
+if 'previous_selection' not in st.session_state:
+    st.session_state.previous_selection = None
+
 def generate_essay_question():
     name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
-    question = "What did you do yesterday?"
-    answer = random.choice([
-        "I played badminton.",
-        "I watched a movie.",
-        "I made a car.",
-        "I went fishing.",
-        "I went shopping",
-        "I went to the museum.",
-        "I played soccer",
-        "I played baseball",
-        "I learned about Korean history.",
-        "I went to the space center."
-    ])
-    question_format = f"{name}은 어제 무엇을 했나요?"
+    
+    activities = {
+        "배드민턴": "I played badminton. I enjoyed the game with my friends.",
+        "영화": "I watched a movie. It was a thrilling action film.",
+        "자동차": "I made a car. It was a small toy car model.",
+        "낚시": "I went fishing. I caught three fish at the lake.",
+        "쇼핑": "I went shopping. I bought some new clothes.",
+        "박물관": "I went to the museum. I learned about ancient history.",
+        "축구": "I played soccer. Our team won the match.",
+        "야구": "I played baseball. I hit a home run.",
+        "한국 역사": "I learned about Korean history. I read a book about the Joseon Dynasty.",
+        "우주 센터": "I went to the space center. I saw real rockets there."
+    }
+    
+    activity, dialogue = random.choice(list(activities.items()))
+    
+    question_format = f"{name}는 어제 무엇을 했나요?"
+    
+    korean_options = [
+        "친구들과 게임을 즐겼다",
+        "흥미진진한 액션 영화를 봤다",
+        "작은 장난감 자동차 모델을 만들었다",
+        "호수에서 물고기 세 마리를 잡았다",
+        "새 옷을 샀다",
+        "고대 역사에 대해 배웠다",
+        "축구 경기에서 이겼다",
+        "홈런을 쳤다",
+        "조선 시대에 대한 책을 읽었다",
+        "실제 로켓을 보았다"
+    ]
+    
+    correct_answer = korean_options[list(activities.keys()).index(activity)]
+    wrong_answers = [opt for opt in korean_options if opt != correct_answer]
+    options = random.sample(wrong_answers, 3) + [correct_answer]
+    random.shuffle(options)
 
-    key_expression = f'''
-    A: {question}, {name}
-    B: {answer}
-    '''
-    prompt = f"""
-    {answer}을 이용해 1문장 짜리 짧은 영어 에세이를 만들어 주세요.
-    그 다음, 대화 내용에 관한 간단한 질문을 한국어로 만들어주세요. 
-    마지막으로, 질문에 대한 4개의 선택지를 초등학생이 이해하기 쉬운 한국어로 제공해주세요. 
-    정답은 선택지 중 하나여야 합니다.
-    출력 형식:
-    질문: {question_format}
-    대화: (영어 대화)
-    선택지:
-    1. (선택지 1)
-    2. (선택지 2)
-    3. (선택지 3)
-    4. (선택지 4)
-    정답: (정답 번호)
-    """
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content" : "너는 EFL 환경의 초등학교 영어교사야. 초등학생에 맞는 쉬운 한국어와 영어를 사용해."},
-            {"role": "user", "content": prompt}]
-    )
-    
-    # 응답 내용 로깅
-    print("GPT Response:", response.choices[0].message.content)
-    
-    return response.choices[0].message.content
+    return f"""
+질문: {question_format}
+대화: {dialogue}
+선택지:
+1. {options[0]}
+2. {options[1]}
+3. {options[2]}
+4. {options[3]}
+정답: {options.index(correct_answer) + 1}
+"""
 
 def generate_conversation_question():
-    name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
-    question = "What did you do yesterday?"
-    answer = random.choice([
-        "I played badminton.",
-        "I watched a movie.",
-        "I made a car.",
-        "I went fishing.",
+    names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
+    activities = [
+        "I played badminton",
+        "I watched a movie",
+        "I made a car",
+        "I went fishing",
         "I went shopping",
-        "I went to the museum.",
+        "I went to the museum",
         "I played soccer",
         "I played baseball",
-        "I learned about Korean history.",
-        "I went to the space center."
-    ])
-    question_format = random.choice(["무엇에 대해 묻고있나요?","{name}은 어제 무엇을 했나요?"])    
+        "I learned about Korean history",
+        "I went to the space center"
+    ]
 
-    key_expression = f'''
-    A: {name}, {question}
-    B: {answer}
-    '''
-    prompt = f"""{key_expression}으로 영어 대화를 생성해주세요. 
-    그 후 대화 내용에 관한 객관식 질문을 한국어로 만들어주세요. 
-    조건: 문제의 정답은 1개 입니다. 
-    A와 B가 대화할 때 A가 B의 이름을 부르면서 대화를 합니다. B의 이름은 {name} 입니다.
-    영어 대화는 A와 B가 각각 1번 말하고 끝납니다.
-    형식:
-    [영어 대화]
-    A: ...
-    B: ...
+    name = random.choice(names)
+    activity = random.choice(activities)
 
-    [한국어 질문]
-    조건: {question_format}을 만들어야 합니다. 영어 대화에서 생성된 A와 B의 이름 중 필요한 것을 골라서 질문에 사용해야 합니다.
-    질문: (한국어로 된 질문) 이 때, 선택지는 한국어로 제공됩니다.
-    A. (선택지)
-    B. (선택지)
-    C. (선택지)
-    D. (선택지)
-    정답: (정답 선택지)
-    """
+    dialogue = f"""
+A: {name}, what did you do yesterday?
+B: {activity}.
+"""
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
+    question = f"{name}은 어제 무엇을 했나요?"
+    correct_answer = activity
 
-    return response.choices[0].message.content
+    # 오답 생성
+    wrong_answers = random.sample([a for a in activities if a != activity], 3)
+    options = [activity] + wrong_answers
+    random.shuffle(options)
+
+    # 선택지를 한국어로 변환
+    korean_activities = {
+        "I played badminton": "배드민턴을 쳤다",
+        "I watched a movie": "영화를 봤다",
+        "I made a car": "자동차를 만들었다",
+        "I went fishing": "낚시를 갔다",
+        "I went shopping": "쇼핑을 갔다",
+        "I went to the museum": "박물관에 갔다",
+        "I played soccer": "축구를 했다",
+        "I played baseball": "야구를 했다",
+        "I learned about Korean history": "한국 역사를 공부했다",
+        "I went to the space center": "우주 센터에 갔다"
+    }
+
+    korean_options = [korean_activities[opt] for opt in options]
+    correct_answer = korean_activities[correct_answer]
+
+    return f"""
+[영어 대화]
+{dialogue}
+
+[한국어 질문]
+질문: {question}
+A. {korean_options[0]}
+B. {korean_options[1]}
+C. {korean_options[2]}
+D. {korean_options[3]}
+정답: {chr(65 + korean_options.index(correct_answer))}
+"""
 
 def generate_question():
     # 현재 문제 유형에 따라 다음 문제 유형 결정
@@ -248,20 +270,69 @@ def get_explanation_dialogue(question, dialogue, correct_answer, selected_option
     
     return response.choices[0].message.content.strip()
 
+def display_question(question_type):
+    if question_type == "essay":
+        passage, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "essay")
+    else:
+        dialogue, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "conversation")
+    
+    st.subheader("질문")
+    st.write(question)
+
+    if question_type == "essay":
+        st.divider()
+        st.write(passage)
+        st.divider()
+    else:
+        st.divider()
+        st.text(dialogue)
+        st.divider()
+
+    st.subheader("다음 중 알맞은 답을 골라보세요.")
+    
+    with st.form(key='answer_form'):
+        selected_option = st.radio("", options, index=None)
+        submit_button = st.form_submit_button(label='정답 확인')
+
+        if submit_button and not st.session_state.question_answered:
+            if selected_option:
+                st.info(f"선택한 답: {selected_option}")
+                st.session_state.question_answered = True
+                st.session_state.reading_quiz_total_questions += 1
+                is_correct = (question_type == "essay" and int(selected_option.split('.')[0].strip()) == correct_answer) or \
+                             (question_type == "conversation" and selected_option.split('.')[0].strip() == correct_answer)
+                
+                if is_correct:
+                    st.success("정답입니다!")
+                    st.session_state.reading_quiz_correct_answers += 1
+                else:
+                    st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
+                    if question_type == "essay":
+                        explanation = get_explanation_essay(question, passage, correct_answer, selected_option)
+                    else:
+                        explanation = get_explanation_dialogue(question, dialogue, correct_answer, selected_option)
+                    st.write(explanation)
+                
+                update_sidebar()
+            else:
+                st.warning("답을 선택해주세요.")
+        elif st.session_state.question_answered:
+            st.warning("새 문제를 만들어주세요.")
+
 def main():
-    # Streamlit UI
     st.header("✨인공지능 영어 퀴즈 선생님 퀴즐링🕵️‍♀️")
     st.subheader("어제 한 일에 대해 묻고 답하기 영어읽기 퀴즈🚵‍♂️")
     st.divider()
 
-    #확장 설명
+    # 확장 설명
     with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 👆✅", expanded=False):
         st.markdown(
     """     
-    1️⃣ [새 문제 만들기] 버튼을 눌러 문제 만들기.<br>
-    2️⃣ 질문과 대화를 읽어보기<br> 
-    3️⃣ 정답을 선택하고 [정답 확인] 버튼 누르기.<br>
-    4️⃣ 정답 확인하기.<br>
+    1️⃣ 난이도를 선택하세요: 기본 또는 심화<br>
+    2️⃣ [새 문제 만들기] 버튼을 눌러 문제를 만드세요.<br>
+    3️⃣ 질문과 대화를 읽어보세요.<br> 
+    4️⃣ 정답을 선택하고 [정답 확인] 버튼을 누르세요.<br>
+    5️⃣ 정답을 확인하세요.<br>
     <br>
     🙏 퀴즐링은 완벽하지 않을 수 있어요.<br> 
     🙏 그럴 때에는 [새 문제 만들기] 버튼을 눌러주세요.
@@ -270,69 +341,24 @@ def main():
 
     if st.session_state.reading_quiz_current_question:
         if st.session_state.reading_quiz_current_question_type == "essay":
-            passage, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "essay")
-            
-            st.subheader("질문")
-            st.write(question)
-
-            st.divider()
-            st.write(passage)
-            st.divider()
-
-            st.subheader("다음 중 알맞은 답을 골라보세요.")
-            selected_option = st.radio("", options, index=None, key="essay_options")
-            st.session_state.selected_option = selected_option
-
+            display_question("essay")
         else:
-            dialogue, question, options, correct_answer = parse_question_data(st.session_state.reading_quiz_current_question, "conversation")
-            
-            st.markdown("### 질문")
-            st.write(question)
-            
-            st.divider()
-            st.text(dialogue)
-            st.divider() 
-            st.subheader("다음 중 알맞은 답을 골라보세요.")
-            selected_option = st.radio("", options, index=None, key="conversation_options")
-            st.session_state.selected_option = selected_option
+            display_question("conversation")
 
-        if st.button("정답 확인"):
-            st.session_state.reading_quiz_total_questions += 1
-            if st.session_state.selected_option:
-                st.markdown(f"""
-                <div style='background-color: #E6F3FF; padding: 10px; border-radius: 5px; margin-top: 10px;'>
-                선택한 답: {st.session_state.selected_option}
-                </div>
-                """, unsafe_allow_html=True)
+    st.divider()
 
-                if st.session_state.reading_quiz_current_question_type == "essay":
-                    selected_number = int(st.session_state.selected_option.split('.')[0].strip())
-                    is_correct = selected_number == correct_answer
-                else:
-                    selected_letter = st.session_state.selected_option.split('.')[0].strip()
-                    is_correct = selected_letter == correct_answer
-                
-                if is_correct:
-                    st.success("정답입니다!")
-                    st.session_state.reading_quiz_correct_answers += 1
-                else:
-                    st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
-                    if st.session_state.reading_quiz_current_question_type == "essay":
-                        explanation = get_explanation_essay(question, passage, correct_answer, st.session_state.selected_option)
-                    else:
-                        explanation = get_explanation_dialogue(question, dialogue, correct_answer, st.session_state.selected_option)
-                    st.write(explanation)
-                
-                update_sidebar()
-                st.session_state.reading_quiz_current_question = None
-            else:
-                st.warning("선택지를 선택하고 정답 확인 버튼을 눌러주세요.")
-    else:
-        st.info("아래의 '새 문제 만들기' 버튼을 눌러 퀴즈를 시작하세요.")
-
+    # 난이도 선택 버튼과 새 문제 만들기 버튼을 맨 아래로 이동
+    difficulty = st.radio("난이도를 선택하세요:", ("기본", "심화"))
+    
     if st.button("새 문제 만들기"):
         with st.spinner("새로운 문제를 생성 중입니다..."):
-            st.session_state.reading_quiz_current_question, st.session_state.reading_quiz_current_question_type = generate_question()
+            if difficulty == "기본":
+                st.session_state.reading_quiz_current_question = generate_conversation_question()
+                st.session_state.reading_quiz_current_question_type = "conversation"
+            else:
+                st.session_state.reading_quiz_current_question = generate_essay_question()
+                st.session_state.reading_quiz_current_question_type = "essay"
+            st.session_state.question_answered = False
         st.rerun()
 
 if __name__ == "__main__":
