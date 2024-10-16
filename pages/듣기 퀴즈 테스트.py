@@ -39,7 +39,7 @@ def update_sidebar():
 # 초기 사이드바 설정
 update_sidebar()
 
-# 미리 정의된 선택지
+# 미리 정의된 선택지 (모두 한국어로)
 predefined_options = [
     "배드민턴을 쳤다.",
     "영화를 봤다.",
@@ -95,22 +95,21 @@ def generate_question():
 {speaker_b}: {selected_answer}
 """
 
-    # 정답 선택지 생성
-    correct_answer = selected_answer.split('.')[0][2:]  # "I " 제거
-    correct_option = f"{correct_answer}."
+    # 정답 선택지 생성 (한국어로 변환)
+    correct_answer_korean = next(opt for opt in predefined_options if opt in selected_answer)
 
     # 오답 선택지 생성
-    wrong_options = random.sample([opt for opt in predefined_options if opt != correct_option], 3)
+    wrong_options = random.sample([opt for opt in predefined_options if opt != correct_answer_korean], 3)
     
     # 모든 선택지 합치기 및 섞기
-    all_options = [correct_option] + wrong_options
+    all_options = [correct_answer_korean] + wrong_options
     random.shuffle(all_options)
 
     # 선택지에 A, B, C, D 추가
     options = [f"{chr(65 + i)}. {option}" for i, option in enumerate(all_options)]
 
     # 정답 찾기
-    correct_answer = next(opt for opt in options if correct_option in opt)
+    correct_answer = next(opt for opt in options if correct_answer_korean in opt)
 
     return dialogue, selected_korean_question.format(name=speaker_b), options, correct_answer
 
