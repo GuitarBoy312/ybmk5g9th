@@ -17,7 +17,7 @@ SYSTEM_MESSAGE = {
     '''
 }
 
-# 초기화 함수
+# 초기화 함수 수정
 def initialize_session():
     for key in list(st.session_state.keys()):
         del st.session_state[key]
@@ -26,9 +26,10 @@ def initialize_session():
     st.session_state['audio_data'] = []
     st.session_state['tts_data'] = []
     st.session_state['initialized'] = True
+    st.session_state['page'] = '자유 대화'  # 현재 페이지 표시
 
-# 세션 상태 초기화
-if 'initialized' not in st.session_state or not st.session_state['initialized']:
+# 세션 상태 초기화 로직 수정
+if 'initialized' not in st.session_state or not st.session_state['initialized'] or st.session_state.get('page') != '자유 대화':
     initialize_session()
 
 # ChatGPT API 호출
