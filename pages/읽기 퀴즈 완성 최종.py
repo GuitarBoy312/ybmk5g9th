@@ -317,7 +317,7 @@ def display_question(question_type):
             else:
                 st.warning("답을 선택해주세요.")
         elif st.session_state.question_answered:
-            st.warning("이미 답변을 제출했습니다. 새 문제를 만들어주세요.")
+            st.warning("새 문제를 만들어주세요.")
 
 def main():
     st.header("✨인공지능 영어 퀴즈 선생님 퀴즐링🕵️‍♀️")
