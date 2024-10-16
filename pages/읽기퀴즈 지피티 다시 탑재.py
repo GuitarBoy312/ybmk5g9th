@@ -42,16 +42,16 @@ def generate_essay_question():
     name = random.choice(["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"])
     
     activities = {
-        "played badminton": "I enjoyed the game with my friends.",
-        "watched a movie": "It was a thrilling action film.",
-        "made a car": "It was a small toy car model.",
-        "went fishing": "I caught three fish at the lake.",
-        "went shopping": "I bought some new clothes.",
-        "went to the museum": "I learned about ancient history.",
-        "played soccer": "Our team won the match.",
-        "played baseball": "I hit a home run.",
-        "learned about Korean history": "I read a book about the Joseon Dynasty.",
-        "went to the space center": "I saw real rockets there."
+        "배드민턴을 쳤다": "I enjoyed the game with my friends.",
+        "영화를 봤다": "It was a thrilling action film.",
+        "자동차를 만들었다": "It was a small toy car model.",
+        "낚시를 갔다": "I caught three fish at the lake.",
+        "쇼핑을 갔다": "I bought some new clothes.",
+        "박물관에 갔다": "I learned about ancient history.",
+        "축구를 했다": "Our team won the match.",
+        "야구를 했다": "I hit a home run.",
+        "한국 역사를 공부했다": "I read a book about the Joseon Dynasty.",
+        "우주 센터에 갔다": "I saw real rockets there."
     }
     
     activity, second_sentence = random.choice(list(activities.items()))
@@ -59,7 +59,6 @@ def generate_essay_question():
     question_format = f"{name}은 {activity}하면서 무엇을 했나요?"
     dialogue = f"I {activity}. {second_sentence}"
     
-    # 선택지를 한국어로 번역
     korean_options = [
         "친구들과 게임을 즐겼다",
         "흥미진진한 액션 영화였다",
@@ -96,16 +95,16 @@ def generate_essay_question():
 def generate_conversation_question():
     names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
     activities = [
-        "played badminton",
-        "watched a movie",
-        "made a car",
-        "went fishing",
-        "went shopping",
-        "went to the museum",
-        "played soccer",
-        "played baseball",
-        "learned about Korean history",
-        "went to the space center"
+        "배드민턴을 쳤다",
+        "영화를 봤다",
+        "자동차를 만들었다",
+        "낚시를 갔다",
+        "쇼핑을 갔다",
+        "박물관에 갔다",
+        "축구를 했다",
+        "야구를 했다",
+        "한국 역사를 공부했다",
+        "우주 센터에 갔다"
     ]
 
     name = random.choice(names)
@@ -126,16 +125,16 @@ B: I {activity}.
 
     # 선택지를 한국어로 변환
     korean_activities = {
-        "played badminton": "배드민턴을 쳤다",
-        "watched a movie": "영화를 봤다",
-        "made a car": "자동차를 만들었다",
-        "went fishing": "낚시를 갔다",
-        "went shopping": "쇼핑을 갔다",
-        "went to the museum": "박물관에 갔다",
-        "played soccer": "축구를 했다",
-        "played baseball": "야구를 했다",
-        "learned about Korean history": "한국 역사를 배웠다",
-        "went to the space center": "우주 센터에 갔다"
+        "배드민턴을 쳤다": "배드민턴을 쳤다",
+        "영화를 봤다": "영화를 봤다",
+        "자동차를 만들었다": "자동차를 만들었다",
+        "낚시를 갔다": "낚시를 갔다",
+        "쇼핑을 갔다": "쇼핑을 갔다",
+        "박물관에 갔다": "박물관에 갔다",
+        "축구를 했다": "축구를 했다",
+        "야구를 했다": "야구를 했다",
+        "한국 역사를 공부했다": "한국 역사를 공부했다",
+        "우주 센터에 갔다": "우주 센터에 갔다"
     }
 
     korean_options = [korean_activities[opt] for opt in options]
