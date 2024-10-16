@@ -38,6 +38,48 @@ def update_sidebar():
 # 초기 사이드바 설정
 update_sidebar()
 
+def generate_gpt_question(essay):
+    prompt = f"""
+    다음 짧은 에세이를 읽고, 이에 대한 한국어 독해 질문을 생성해주세요. 
+    질문은 에세이의 내용을 정확히 이해했는지 확인할 수 있는 것이어야 합니다.
+    
+    에세이:
+    {essay}
+    
+    질문:
+    """
+    
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "당신은 영어 교육 전문가입니다. 주어진 영어 에세이에 대한 적절한 한국어 독해 질문을 생성해야 합니다."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    return response.choices[0].message.content.strip()
+
+def generate_gpt_additional_info(activity):
+    prompt = f"""
+    다음 활동에 대한 추가 정보를 2개 생성해주세요. 각 정보는 한 문장으로, 영어로 작성해주세요.
+    활동: {activity}
+    
+    예시 형식:
+    1. It was very exciting.
+    2. I learned a lot from this experience.
+    """
+    
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "당신은 영어 교육 전문가입니다. 주어진 활동에 대한 적절한 추가 정보를 영어로 생성해야 합니다."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+    
+    additional_info = response.choices[0].message.content.strip().split('\n')
+    return [info.split('. ')[1] for info in additional_info if '. ' in info]
+
 def generate_essay_question():
     names = ["Marie", "Yena", "Juwon", "Emma", "Dave", "Linh", "Chanho"]
     activities = [
@@ -52,34 +94,15 @@ def generate_essay_question():
         "learned about Korean history",
         "went to the space center"
     ]
-    additional_info = [
-        "It was very exciting.",
-        "I had a great time.",
-        "It was a new experience for me.",
-        "I went with my friends.",
-        "I learned a lot.",
-        "It was challenging but fun.",
-        "I want to do it again soon.",
-        "It took all day.",
-        "I took many photos.",
-        "I met new people there."
-    ]
 
     name = random.choice(names)
     activity = random.choice(activities)
-    info1, info2 = random.sample(additional_info, 2)
+    
+    additional_info = generate_gpt_additional_info(activity)
+    
+    essay = f"""Yesterday, {name} {activity}. {additional_info[0]} {additional_info[1]}"""
 
-    essay = f"""Yesterday, {name} {activity}. {info1} {info2}"""
-
-    question_types = [
-        f"무엇을 {name}이(가) 어제 했나요?",
-        f"{name}은(는) 어제 어땠나요?",
-        f"{name}이(가) 어제 한 활동은 무엇인가요?",
-        f"어제 {name}의 경험에 대해 어떤 것을 알 수 있나요?",
-        f"{name}이(가) 어제 한 활동에 대한 느낌은 어땠나요?"
-    ]
-
-    question = random.choice(question_types)
+    question = generate_gpt_question(essay)
 
     correct_answer = activity.split()[1] if ' ' in activity else activity
     wrong_answers = random.sample([a.split()[1] if ' ' in a else a for a in activities if a != activity], 3)
