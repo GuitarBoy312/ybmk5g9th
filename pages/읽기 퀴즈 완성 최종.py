@@ -297,23 +297,26 @@ def display_question(question_type):
         if submit_button:
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
-                st.session_state.question_answered = True
-                st.session_state.reading_quiz_total_questions += 1
-                is_correct = (question_type == "essay" and int(selected_option.split('.')[0].strip()) == correct_answer) or \
-                             (question_type == "conversation" and selected_option.split('.')[0].strip() == correct_answer)
-                
-                if is_correct:
-                    st.success("정답입니다!")
-                    st.session_state.reading_quiz_correct_answers += 1
-                else:
-                    st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
-                    if question_type == "essay":
-                        explanation = get_explanation_essay(question, passage, correct_answer, selected_option)
+                if not st.session_state.question_answered:
+                    st.session_state.reading_quiz_total_questions += 1
+                    is_correct = (question_type == "essay" and int(selected_option.split('.')[0].strip()) == correct_answer) or \
+                                 (question_type == "conversation" and selected_option.split('.')[0].strip() == correct_answer)
+                    
+                    if is_correct:
+                        st.success("정답입니다!")
+                        st.session_state.reading_quiz_correct_answers += 1
                     else:
-                        explanation = get_explanation_dialogue(question, dialogue, correct_answer, selected_option)
-                    st.write(explanation)
-                
-                update_sidebar()
+                        st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
+                        if question_type == "essay":
+                            explanation = get_explanation_essay(question, passage, correct_answer, selected_option)
+                        else:
+                            explanation = get_explanation_dialogue(question, dialogue, correct_answer, selected_option)
+                        st.write(explanation)
+                    
+                    update_sidebar()
+                    st.session_state.question_answered = True
+                else:
+                    st.warning("이미 답변을 제출했습니다. 새 문제를 만들어주세요.")
             else:
                 st.warning("답을 선택해주세요.")
 
@@ -355,20 +358,10 @@ def main():
     if st.session_state.previous_difficulty != difficulty:
         st.session_state.previous_difficulty = difficulty
         st.session_state.question_answered = False
+        generate_new_question(difficulty)
 
     if st.button("새 문제 만들기"):
         generate_new_question(difficulty)
-
-def generate_new_question(difficulty):
-    with st.spinner("새로운 문제를 생성 중입니다..."):
-        if difficulty == "기본":
-            st.session_state.reading_quiz_current_question = generate_conversation_question()
-            st.session_state.reading_quiz_current_question_type = "conversation"
-        else:
-            st.session_state.reading_quiz_current_question = generate_essay_question()
-            st.session_state.reading_quiz_current_question_type = "essay"
-        st.session_state.question_answered = False
-    st.rerun()
 
 if __name__ == "__main__":
     main()
