@@ -94,7 +94,7 @@ if st.session_state.writing_quiz_current_question is not None:
         if user_answer:  # 사용자가 답을 입력했는지 확인
             st.write(f"입력한 답: {user_answer}")
             
-            st.session_state.writing_quiz_total_questions += 1
+            #st.session_state.writing_quiz_total_questions += 1
             if user_answer.lower() == correct_word.lower():
                 st.success("정답입니다!")
                 st.session_state.writing_quiz_correct_answers += 1
@@ -112,5 +112,6 @@ if st.session_state.writing_quiz_current_question is not None:
 # "새 문제 만들기" 버튼
 if st.button("새 문제 만들기"):
     st.session_state.writing_quiz_current_question = generate_question()
+    st.session_state.writing_quiz_total_questions += 1
     update_sidebar()
     st.rerun()
