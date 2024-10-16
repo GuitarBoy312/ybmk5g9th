@@ -294,9 +294,10 @@ def display_question(question_type):
         selected_option = st.radio("", options, index=None)
         submit_button = st.form_submit_button(label='정답 확인')
 
-        if submit_button:
+        if submit_button and not st.session_state.question_answered:
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
+                st.session_state.question_answered = True
                 st.session_state.reading_quiz_total_questions += 1
                 is_correct = (question_type == "essay" and int(selected_option.split('.')[0].strip()) == correct_answer) or \
                              (question_type == "conversation" and selected_option.split('.')[0].strip() == correct_answer)
@@ -313,9 +314,10 @@ def display_question(question_type):
                     st.write(explanation)
                 
                 update_sidebar()
-                st.session_state.question_answered = True
             else:
                 st.warning("답을 선택해주세요.")
+        elif st.session_state.question_answered:
+            st.warning("이미 답변을 제출했습니다. 새 문제를 만들어주세요.")
 
 def main():
     st.header("✨인공지능 영어 퀴즈 선생님 퀴즐링🕵️‍♀️")
@@ -337,25 +339,17 @@ def main():
     """
     ,  unsafe_allow_html=True)
 
-    # 난이도 선택을 드롭다운으로 변경
-    difficulty = st.selectbox("난이도를 선택하세요:", ("기본", "심화"), key="difficulty")
-
-    # 초기 문제 생성
-    if 'reading_quiz_current_question' not in st.session_state or st.session_state.reading_quiz_current_question is None:
-        if difficulty == "기본":
-            st.session_state.reading_quiz_current_question = generate_conversation_question()
-            st.session_state.reading_quiz_current_question_type = "conversation"
-        else:
-            st.session_state.reading_quiz_current_question = generate_essay_question()
-            st.session_state.reading_quiz_current_question_type = "essay"
-
-    # 문제 표시
     if st.session_state.reading_quiz_current_question:
-        display_question(st.session_state.reading_quiz_current_question_type)
+        if st.session_state.reading_quiz_current_question_type == "essay":
+            display_question("essay")
+        else:
+            display_question("conversation")
 
     st.divider()
 
-    # 새 문제 만들기 버튼
+    # 난이도 선택 버튼과 새 문제 만들기 버튼을 맨 아래로 이동
+    difficulty = st.radio("난이도를 선택하세요:", ("기본", "심화"))
+    
     if st.button("새 문제 만들기"):
         with st.spinner("새로운 문제를 생성 중입니다..."):
             if difficulty == "기본":
