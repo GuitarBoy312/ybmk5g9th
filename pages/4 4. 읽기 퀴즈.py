@@ -298,7 +298,7 @@ def display_question(question_type):
             if selected_option:
                 st.info(f"선택한 답: {selected_option}")
                 st.session_state.question_answered = True
-                st.session_state.reading_quiz_total_questions += 1
+                #st.session_state.reading_quiz_total_questions += 1
                 is_correct = (question_type == "essay" and int(selected_option.split('.')[0].strip()) == correct_answer) or \
                              (question_type == "conversation" and selected_option.split('.')[0].strip() == correct_answer)
                 
@@ -359,6 +359,10 @@ def main():
                 st.session_state.reading_quiz_current_question = generate_essay_question()
                 st.session_state.reading_quiz_current_question_type = "essay"
             st.session_state.question_answered = False
+            
+            st.session_state.reading_quiz_total_questions += 1  # 총 문제 수 증가
+            update_sidebar()
+            
         st.rerun()
 
 if __name__ == "__main__":
