@@ -164,10 +164,42 @@ if not st.session_state.button_clicked:
         
         st.rerun()
 
-# 10초 후 버튼 다시 활성화
-if st.session_state.button_clicked and (current_time - st.session_state.button_click_time) > 10:
+# 3초 후 버튼 다시 활성화
+if st.session_state.button_clicked and (current_time - st.session_state.button_click_time) > 3:
     st.session_state.button_clicked = False
     st.rerun()
+
+# 버튼 클릭 후 문제 표시
+if st.session_state.listening_quiz_current_question is not None:
+    st.markdown("### 질문")
+    st.write(st.session_state.question)
+    
+    st.markdown("### 대화 듣기")
+    st.write("왼쪽부터 순서대로 들어보세요. 너무 빠르면 눈사람 버튼을 눌러 속도를 조절해보세요.")
+    st.markdown(st.session_state.audio_tags, unsafe_allow_html=True)
+    
+    with st.form(key='answer_form'):
+        selected_option = st.radio("정답을 선택하세요:", st.session_state.options, index=None)
+        submit_button = st.form_submit_button(label='정답 확인')
+        
+        if submit_button:
+            if selected_option:
+                st.info(f"선택한 답: {selected_option}")
+                correct_answer = st.session_state.correct_answer
+                user_answer = selected_option
+                
+                if user_answer == correct_answer:
+                    st.success("정답입니다!")
+                    st.session_state.listening_quiz_correct_answers += 1
+                else:
+                    st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
+                
+                st.text(st.session_state.dialogue)
+                
+                update_sidebar()
+                st.session_state.listening_quiz_current_question = None
+            else:
+                st.warning("답을 선택해주세요.")
 
 # Streamlit UI
 
@@ -190,35 +222,3 @@ with st.expander("❗❗ 글상자를 펼쳐 사용방법을 읽어보세요 �
     🙏 그럴 때에는 [새 문제 만들기] 버튼을 다시 눌러주세요.
     """
     ,  unsafe_allow_html=True)
-
-if st.session_state.listening_quiz_current_question is not None:
-    st.markdown("### 질문")
-    st.write(st.session_state.question)
-    
-    st.markdown("### 대화 듣기")
-    st.write("왼쪽부터 순서대로 들어보세요. 너무 빠르면 눈사람 버튼을 눌러 속도를 조절해보세요.")
-    st.markdown(st.session_state.audio_tags, unsafe_allow_html=True)
-    
-    with st.form(key='answer_form'):
-        selected_option = st.radio("정답을 선택하세요:", st.session_state.options, index=None)
-        submit_button = st.form_submit_button(label='정답 확인')
-        
-        if submit_button:
-            if selected_option:
-                st.info(f"선택한 답: {selected_option}")
-                correct_answer = st.session_state.correct_answer
-                user_answer = selected_option
-                
-                #st.session_state.listening_quiz_total_questions += 1
-                if user_answer == correct_answer:
-                    st.success("정답입니다!")
-                    st.session_state.listening_quiz_correct_answers += 1
-                else:
-                    st.error(f"틀렸습니다. 정답은 {correct_answer}입니다.")
-                
-                st.text(st.session_state.dialogue)
-                
-                update_sidebar()
-                st.session_state.listening_quiz_current_question = None
-            else:
-                st.warning("답을 선택해주세요.")
