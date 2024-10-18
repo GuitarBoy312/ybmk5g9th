@@ -181,7 +181,7 @@ if st.session_state.listening_quiz_current_question is not None:
                 st.warning("답을 선택해주세요.")
 
 # "새 문제 만들기" 버튼
-if st.button("새 문제 만들기", disabled=False):
+if st.button("새 문제 만들기", disabled=st.session_state.get("button_disabled", False)):
     st.session_state.button_disabled = True
 
     try:
