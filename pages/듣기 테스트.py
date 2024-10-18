@@ -182,7 +182,7 @@ if st.session_state.listening_quiz_current_question is not None:
 
 # "새 문제 만들기" 버튼
 t=st.button("새 문제 만들기")
-t.visible=False
+st.write(t.visible)
 if t:
     try:
         with st.spinner("새로운 문제를 생성 중입니다..."):
