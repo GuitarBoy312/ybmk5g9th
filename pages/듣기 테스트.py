@@ -181,9 +181,8 @@ if st.session_state.listening_quiz_current_question is not None:
                 st.warning("답을 선택해주세요.")
 
 # "새 문제 만들기" 버튼
-t=st.button("새 문제 만들기")
-st.write(t.disabled)
-if t:
+if st.button("새 문제 만들기", disabled=st.session_state.button_disabled):
+    st.session_state.button_disabled = True
     try:
         with st.spinner("새로운 문제를 생성 중입니다..."):
             qa_set = generate_question()
