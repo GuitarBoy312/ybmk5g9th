@@ -104,8 +104,8 @@ if st.session_state.writing_quiz_current_question is not None:
     if st.button("정답 확인"):
         if user_answer:
             # 사용자 답변과 정답에서 모든 구두점 제거 및 소문자화
-            user_words = set(word.lower() for word in re.findall(r'\w+', user_answer))
-            correct_words = set(word.lower() for word in words_to_remove)
+            user_words = set(re.findall(r'\w+', user_answer.lower()))
+            correct_words = set(re.findall(r'\w+', ' '.join(words_to_remove).lower()))
             
             if user_words == correct_words:
                 st.success("정답입니다!")
