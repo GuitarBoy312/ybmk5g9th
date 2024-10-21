@@ -99,10 +99,10 @@ if st.session_state.writing_quiz_current_question is not None:
 
     if st.button("정답 확인"):
         if user_answer:
-            user_words = user_answer.lower().split()
-            correct_words = [word.lower() for word in words_to_remove]
+            user_words = set(user_answer.lower().replace('.', '').replace(',', '').split())
+            correct_words = set(word.lower() for word in words_to_remove)
             
-            if set(user_words) == set(correct_words):
+            if user_words == correct_words:
                 st.success("정답입니다!")
                 st.session_state.writing_quiz_correct_answers += 1
             else:
