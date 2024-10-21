@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import re
 
 sentences = [
     ("I played badminton yesterday.", "나는 어제 배드민턴을 쳤어요.", "🏸"),
@@ -54,6 +55,9 @@ def generate_question():
     
     blanked_sentence = ' '.join(blanked_words)
     
+    # 정답 문장 저장
+    st.session_state.writing_quiz_full_sentence = ' '.join(words)
+    
     st.session_state.writing_quiz_current_question_index += 1
     
     return blanked_sentence, translation, emoji, words_to_remove
@@ -99,7 +103,8 @@ if st.session_state.writing_quiz_current_question is not None:
 
     if st.button("정답 확인"):
         if user_answer:
-            user_words = set(user_answer.lower().replace('.', '').replace(',', '').split())
+            # 사용자 답변과 정답에서 모든 구두점 제거 및 소문자화
+            user_words = set(word.lower() for word in re.findall(r'\w+', user_answer))
             correct_words = set(word.lower() for word in words_to_remove)
             
             if user_words == correct_words:
@@ -108,7 +113,8 @@ if st.session_state.writing_quiz_current_question is not None:
             else:
                 st.error(f"틀렸습니다. 정답은 {', '.join(words_to_remove)}입니다.")
             
-            full_sentence = blanked_sentence.replace('_____', ' '.join(words_to_remove))
+            # 정답 문장 표시 수정
+            full_sentence = ' '.join(words)  # 원래 문장 그대로 표시
             st.markdown(f"### 정답 문장: {full_sentence} {emoji}")
             
             update_sidebar()
