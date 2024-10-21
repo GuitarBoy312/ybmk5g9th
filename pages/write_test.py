@@ -56,7 +56,7 @@ def generate_question():
     blanked_sentence = ' '.join(blanked_words)
     
     # 정답 문장 저장
-    st.session_state.writing_quiz_full_sentence = ' '.join(words)
+    st.session_state.writing_quiz_full_sentence = sentence
     
     st.session_state.writing_quiz_current_question_index += 1
     
@@ -113,9 +113,8 @@ if st.session_state.writing_quiz_current_question is not None:
             else:
                 st.error(f"틀렸습니다. 정답은 {', '.join(words_to_remove)}입니다.")
             
-            # 정답 문장 표시 수정
-            full_sentence = ' '.join(words)  # 원래 문장 그대로 표시
-            st.markdown(f"### 정답 문장: {full_sentence} {emoji}")
+            # 정답 문장 표시
+            st.markdown(f"### 정답 문장: {st.session_state.writing_quiz_full_sentence} {emoji}")
             
             update_sidebar()
             st.session_state.writing_quiz_current_question = None
