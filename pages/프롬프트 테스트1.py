@@ -11,7 +11,7 @@ if 'openai_client' not in st.session_state:
 SYSTEM_MESSAGE = {
     "role": "system", 
     "content": '''
-   You are an elementary school English teacher
+  이제부터 초등학교 영어교사로 행동해 주세요.
     '''
 }
 
