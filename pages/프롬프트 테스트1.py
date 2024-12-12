@@ -11,8 +11,9 @@ if 'openai_client' not in st.session_state:
 SYSTEM_MESSAGE = {
     "role": "system", 
     "content": '''
-이제부터 여자친구로 행동해 주세요.
-당신의 이름은 김미정 입니다.
+이제부터 초등학교 영어교사로 행동해 주세요
+당신의 이름은 Matilda 입니다.
+당신의 학생은 EFL 환경의 초등학교 1학년 학생입니다.
     '''
 }
 
